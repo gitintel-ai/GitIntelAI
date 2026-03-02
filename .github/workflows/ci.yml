@@ -1,0 +1,252 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ════════════════════════════════════════════════════════════════
+  # CLI (Rust)
+  # ════════════════════════════════════════════════════════════════
+  cli:
+    name: CLI Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cli
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/cli
+
+      - name: Check formatting
+        run: cargo fmt --check
+
+      - name: Clippy lints
+        run: cargo clippy -- -D warnings
+
+      - name: Run tests
+        run: cargo test --all-features
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: devaudit-linux-amd64
+          path: packages/cli/target/release/devaudit
+
+  # ════════════════════════════════════════════════════════════════
+  # API Server (Bun)
+  # ════════════════════════════════════════════════════════════════
+  server:
+    name: Server Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/server
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: devaudit_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Run tests
+        run: bun test
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/devaudit_test
+
+  # ════════════════════════════════════════════════════════════════
+  # Dashboard (Next.js)
+  # ════════════════════════════════════════════════════════════════
+  dashboard:
+    name: Dashboard Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Build
+        run: bun run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+
+  # ════════════════════════════════════════════════════════════════
+  # Dashboard E2E (Playwright)
+  # ════════════════════════════════════════════════════════════════
+  e2e:
+    name: Dashboard E2E
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/dashboard
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Build dashboard
+        run: bun run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+
+      - name: Run E2E tests
+        run: bunx playwright test --project=chromium
+        env:
+          CI: true
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: packages/dashboard/playwright-report/
+          retention-days: 14
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-results
+          path: packages/dashboard/test-results/
+          retention-days: 14
+
+  # ════════════════════════════════════════════════════════════════
+  # Core Library
+  # ════════════════════════════════════════════════════════════════
+  core:
+    name: Core Library
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/core
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check
+        run: bun run type-check
+
+      - name: Run tests
+        run: bun test
+
+  # ════════════════════════════════════════════════════════════════
+  # Docker Build
+  # ════════════════════════════════════════════════════════════════
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [cli, server, dashboard, e2e]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build CLI image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.cli
+          push: false
+          tags: devaudit/cli:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Server image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.server
+          push: false
+          tags: devaudit/server:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Dashboard image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.dashboard
+          push: false
+          tags: devaudit/dashboard:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

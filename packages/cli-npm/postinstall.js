@@ -6,7 +6,7 @@ const https = require('https');
 const path = require('path');
 
 const VERSION = require('./package.json').version;
-const REPO = 'gitintel-ai/gitintel';
+const REPO = 'gitintel-ai/GitIntelAI';
 const BIN_DIR = path.join(__dirname, 'bin');
 
 // ── Platform detection ────────────────────────────────────────────────────────

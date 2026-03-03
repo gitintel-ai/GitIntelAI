@@ -1,5 +1,5 @@
 {
-  "name": "@gitintel/cli",
+  "name": "gitintel",
   "version": "0.1.0",
   "description": "GitIntel AI — git-native AI adoption tracking, cost intelligence, and context optimization",
   "keywords": [
@@ -16,10 +16,10 @@
   "homepage": "https://gitintel.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/gitintel-ai/gitintel.git"
+    "url": "https://github.com/gitintel-ai/GitIntelAI.git"
   },
   "bugs": {
-    "url": "https://github.com/gitintel-ai/gitintel/issues"
+    "url": "https://github.com/gitintel-ai/GitIntelAI/issues"
   },
   "license": "MIT",
   "bin": {

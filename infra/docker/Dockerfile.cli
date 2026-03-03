@@ -18,7 +18,6 @@ RUN rm -rf src
 
 # Copy actual source
 COPY packages/cli/src ./src
-COPY packages/cli/migrations ./migrations
 
 # Build release binary
 RUN cargo build --release --target x86_64-unknown-linux-musl

@@ -1,59 +1,60 @@
 # GitIntel API Server Dockerfile
-# Multi-stage build with Bun
+# Multi-stage build with Bun workspaces
 
+# ── Deps stage ────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS deps
 
 WORKDIR /app
 
-# Copy package files
-COPY packages/server/package.json packages/server/bun.lockb* ./
-COPY packages/core/package.json ../core/
+# Copy root workspace manifest + lockfile first (needed to resolve workspace:*)
+COPY package.json bun.lock ./
 
-# Install dependencies
-RUN bun install --frozen-lockfile --production
+# Copy package manifests for the packages we need
+COPY packages/server/package.json ./packages/server/
+COPY packages/core/package.json ./packages/core/
 
-# Builder stage
+# Install all workspace dependencies
+RUN bun install --frozen-lockfile
+
+# ── Builder stage ─────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS builder
 
 WORKDIR /app
 
-# Copy dependencies
+# Copy installed node_modules from deps stage
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /core/node_modules ../core/node_modules
+COPY --from=deps /app/packages/server/node_modules ./packages/server/node_modules
+COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
 
 # Copy source
-COPY packages/server/ ./
-COPY packages/core/ ../core/
+COPY package.json ./
+COPY packages/core/ ./packages/core/
+COPY packages/server/ ./packages/server/
 
-# Build TypeScript
-RUN bun run build
+# Build core lib first, then server
+RUN cd packages/core && bun run build
+RUN cd packages/server && bun run build
 
-# Runtime stage
+# ── Runtime stage ─────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS runner
 
 WORKDIR /app
 
-# Create non-root user
 RUN addgroup -S gitintel && adduser -S gitintel -G gitintel
 
-# Copy built app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/drizzle.config.ts ./
-COPY --from=builder /app/src/db/migrations ./src/db/migrations
+# Copy only what's needed to run
+COPY --from=builder /app/packages/server/dist ./dist
+COPY --from=builder /app/packages/server/node_modules ./node_modules
+COPY --from=builder /app/packages/server/package.json ./
+COPY --from=builder /app/packages/server/src/db/migrations ./src/db/migrations
 
-# Set ownership
 RUN chown -R gitintel:gitintel /app
 
 USER gitintel
 
-# Expose port
 EXPOSE 3001
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
-# Run migrations and start server
 CMD ["sh", "-c", "bun run db:migrate && bun run start"]

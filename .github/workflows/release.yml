@@ -99,7 +99,7 @@ jobs:
           npm version "$VERSION" --no-git-tag-version --allow-same-version
           # Write auth explicitly — setup-node's .npmrc stays in GITHUB_WORKSPACE
           echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > .npmrc
-          npm publish --access public
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

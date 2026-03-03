@@ -1,5 +1,5 @@
 {
-  "name": "@gitintel/cli",
+  "name": "gitintel",
   "version": "0.1.0",
   "description": "GitIntel AI — git-native AI adoption tracking, cost intelligence, and context optimization",
   "keywords": [

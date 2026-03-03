@@ -1,45 +1,46 @@
-# GitIntel Dashboard Dockerfile
-# Multi-stage build with Next.js standalone output
+# GitIntel Dashboard — Dockerfile
+# Next.js standalone output for minimal runtime image.
+# Requires next.config.js: output: 'standalone'
 
-# ── Deps stage ────────────────────────────────────────────────────────────────
+# ── Deps ──────────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS deps
 
 WORKDIR /app
 
-# Root workspace manifest + lockfile (needed to resolve workspace:*)
 COPY package.json bun.lock ./
-
-# Package manifests
-COPY packages/dashboard/package.json ./packages/dashboard/
-COPY packages/core/package.json ./packages/core/
+COPY packages/core/package.json      ./packages/core/package.json
+COPY packages/server/package.json    ./packages/server/package.json
+COPY packages/dashboard/package.json ./packages/dashboard/package.json
+COPY packages/cli-npm/package.json   ./packages/cli-npm/package.json
 
 RUN bun install --frozen-lockfile
 
-# ── Builder stage ─────────────────────────────────────────────────────────────
+# ── Builder ───────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS builder
 
 WORKDIR /app
 
+# Root node_modules (hoisted by bun)
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/dashboard/node_modules ./packages/dashboard/node_modules
-COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
 
-COPY package.json ./
-COPY packages/core/ ./packages/core/
+COPY package.json bun.lock ./
+COPY packages/core/      ./packages/core/
 COPY packages/dashboard/ ./packages/dashboard/
 
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build core first, then dashboard
+# Build core first so @gitintel/core exports are available
 RUN cd packages/core && bun run build
+
+# Next.js build (outputs standalone because of output: 'standalone' in next.config.js)
 RUN cd packages/dashboard && bun run build
 
-# ── Runtime stage ─────────────────────────────────────────────────────────────
-FROM oven/bun:1.2-alpine AS runner
+# ── Runtime ───────────────────────────────────────────────────────────────────
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
@@ -48,9 +49,10 @@ RUN addgroup -S gitintel && adduser -S gitintel -G gitintel
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# standalone output bundles everything needed to run — no node_modules required
 COPY --from=builder /app/packages/dashboard/.next/standalone ./
-COPY --from=builder /app/packages/dashboard/.next/static ./.next/static
-COPY --from=builder /app/packages/dashboard/public ./public
+COPY --from=builder /app/packages/dashboard/.next/static     ./.next/static
+COPY --from=builder /app/packages/dashboard/public           ./public
 
 RUN chown -R gitintel:gitintel /app
 
@@ -61,4 +63,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
 
-CMD ["bun", "server.js"]
+CMD ["node", "server.js"]

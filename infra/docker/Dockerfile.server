@@ -1,52 +1,39 @@
-# GitIntel API Server Dockerfile
-# Multi-stage build with Bun workspaces
+# GitIntel API Server — Dockerfile
+# Bun runs TypeScript natively so no compile step needed.
 
-# ── Deps stage ────────────────────────────────────────────────────────────────
+# ── Deps ──────────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS deps
 
 WORKDIR /app
 
-# Copy root workspace manifest + lockfile first (needed to resolve workspace:*)
+# Root workspace manifest + lockfile must come first.
+# ALL workspace package.json files must be present for --frozen-lockfile
+# to reconcile against the lockfile (which was generated with all 4 packages).
 COPY package.json bun.lock ./
+COPY packages/core/package.json      ./packages/core/package.json
+COPY packages/server/package.json    ./packages/server/package.json
+COPY packages/dashboard/package.json ./packages/dashboard/package.json
+COPY packages/cli-npm/package.json   ./packages/cli-npm/package.json
 
-# Copy package manifests for the packages we need
-COPY packages/server/package.json ./packages/server/
-COPY packages/core/package.json ./packages/core/
-
-# Install all workspace dependencies
+# Bun hoists everything to root node_modules
 RUN bun install --frozen-lockfile
 
-# ── Builder stage ─────────────────────────────────────────────────────────────
-FROM oven/bun:1.2-alpine AS builder
-
-WORKDIR /app
-
-# Copy installed node_modules from deps stage
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages/server/node_modules ./packages/server/node_modules
-COPY --from=deps /app/packages/core/node_modules ./packages/core/node_modules
-
-# Copy source
-COPY package.json ./
-COPY packages/core/ ./packages/core/
-COPY packages/server/ ./packages/server/
-
-# Build core lib first, then server
-RUN cd packages/core && bun run build
-RUN cd packages/server && bun run build
-
-# ── Runtime stage ─────────────────────────────────────────────────────────────
+# ── Runtime ───────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS runner
 
 WORKDIR /app
 
 RUN addgroup -S gitintel && adduser -S gitintel -G gitintel
 
-# Copy only what's needed to run
-COPY --from=builder /app/packages/server/dist ./dist
-COPY --from=builder /app/packages/server/node_modules ./node_modules
-COPY --from=builder /app/packages/server/package.json ./
-COPY --from=builder /app/packages/server/src/db/migrations ./src/db/migrations
+# Hoisted node_modules from root (bun workspace default)
+COPY --from=deps /app/node_modules ./node_modules
+
+# Workspace root config (needed for bun to resolve workspace packages)
+COPY package.json ./
+
+# Source packages — bun runs TypeScript natively, no build step needed
+COPY packages/core/   ./packages/core/
+COPY packages/server/ ./packages/server/
 
 RUN chown -R gitintel:gitintel /app
 
@@ -57,4 +44,5 @@ EXPOSE 3001
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/health || exit 1
 
-CMD ["sh", "-c", "bun run db:migrate && bun run start"]
+# Run migrations then start (both are plain TypeScript files)
+CMD ["sh", "-c", "bun run packages/server/src/db/migrate.ts && bun packages/server/src/index.ts"]

@@ -127,9 +127,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version
-        id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Extract version and repo
+        id: meta
+        run: |
+          echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Build and push Server
         uses: docker/build-push-action@v5
@@ -139,8 +141,8 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}/server:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/server:latest
+            ghcr.io/${{ steps.meta.outputs.REPO }}/server:${{ steps.meta.outputs.VERSION }}
+            ghcr.io/${{ steps.meta.outputs.REPO }}/server:latest
 
       - name: Build and push Dashboard
         uses: docker/build-push-action@v5
@@ -150,8 +152,8 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}/dashboard:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/dashboard:latest
+            ghcr.io/${{ steps.meta.outputs.REPO }}/dashboard:${{ steps.meta.outputs.VERSION }}
+            ghcr.io/${{ steps.meta.outputs.REPO }}/dashboard:latest
 
       - name: Build and push CLI
         uses: docker/build-push-action@v5
@@ -161,8 +163,8 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository }}/cli:${{ steps.version.outputs.VERSION }}
-            ghcr.io/${{ github.repository }}/cli:latest
+            ghcr.io/${{ steps.meta.outputs.REPO }}/cli:${{ steps.meta.outputs.VERSION }}
+            ghcr.io/${{ steps.meta.outputs.REPO }}/cli:latest
 
   # ════════════════════════════════════════════════════════════════
   # Create Release Notes

@@ -45,7 +45,7 @@ jobs:
 
       - name: Install musl tools (Linux)
         if: contains(matrix.target, 'linux')
-        run: sudo apt-get update && sudo apt-get install -y musl-tools
+        run: sudo apt-get update && sudo apt-get install -y musl-tools perl make
 
       - name: Install cross (for ARM64 Linux)
         if: matrix.target == 'aarch64-unknown-linux-musl'

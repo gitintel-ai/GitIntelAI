@@ -1,0 +1,39 @@
+{
+  "name": "@gitintel/cli",
+  "version": "0.1.0",
+  "description": "GitIntel AI — git-native AI adoption tracking, cost intelligence, and context optimization",
+  "keywords": [
+    "ai",
+    "git",
+    "attribution",
+    "claude-code",
+    "cursor",
+    "copilot",
+    "ai-adoption",
+    "cost-tracking",
+    "context-optimization"
+  ],
+  "homepage": "https://gitintel.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitintel-ai/gitintel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gitintel-ai/gitintel/issues"
+  },
+  "license": "MIT",
+  "bin": {
+    "gitintel": "./bin/gitintel.js"
+  },
+  "scripts": {
+    "postinstall": "node postinstall.js"
+  },
+  "files": [
+    "bin/",
+    "postinstall.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}

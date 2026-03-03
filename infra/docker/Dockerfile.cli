@@ -1,0 +1,44 @@
+# GitIntel CLI Dockerfile
+# Multi-stage build for minimal Alpine image
+
+FROM rust:1.82-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static pkgconf git
+
+WORKDIR /app
+
+# Copy manifests first for better caching
+COPY packages/cli/Cargo.toml packages/cli/Cargo.lock* ./
+
+# Create dummy src to build dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release --target x86_64-unknown-linux-musl || true
+RUN rm -rf src
+
+# Copy actual source
+COPY packages/cli/src ./src
+COPY packages/cli/migrations ./migrations
+
+# Build release binary
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+# Runtime stage
+FROM alpine:3.20
+
+# Install git (required for git operations)
+RUN apk add --no-cache git ca-certificates
+
+# Create non-root user
+RUN addgroup -S gitintel && adduser -S gitintel -G gitintel
+
+# Copy binary
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/gitintel /usr/local/bin/
+
+# Set permissions
+RUN chmod +x /usr/local/bin/gitintel
+
+USER gitintel
+
+ENTRYPOINT ["gitintel"]
+CMD ["--help"]

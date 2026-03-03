@@ -1,0 +1,300 @@
+# Default values for GitIntel Helm chart
+
+# Global settings
+global:
+  imagePullSecrets: []
+  storageClass: ""
+
+# ════════════════════════════════════════════════════════════════
+# API Server
+# ════════════════════════════════════════════════════════════════
+api:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: ghcr.io/acme/gitintel-api
+    tag: ""  # Defaults to appVersion
+    pullPolicy: IfNotPresent
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+
+  service:
+    type: ClusterIP
+    port: 3001
+
+  env:
+    NODE_ENV: production
+    LOG_LEVEL: info
+
+  # Additional environment variables from secrets
+  envFrom: []
+
+# ════════════════════════════════════════════════════════════════
+# Web Dashboard
+# ════════════════════════════════════════════════════════════════
+web:
+  enabled: true
+  replicaCount: 2
+
+  image:
+    repository: ghcr.io/acme/gitintel-web
+    tag: ""
+    pullPolicy: IfNotPresent
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+  env:
+    NEXT_PUBLIC_API_URL: ""  # Set via ingress
+
+# ════════════════════════════════════════════════════════════════
+# OpenTelemetry Collector
+# ════════════════════════════════════════════════════════════════
+otelCollector:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: otel/opentelemetry-collector-contrib
+    tag: "0.91.0"
+    pullPolicy: IfNotPresent
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+  service:
+    grpcPort: 4317
+    httpPort: 4318
+
+  config: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+        timeout: 10s
+        send_batch_size: 1000
+
+    exporters:
+      clickhouse:
+        endpoint: tcp://clickhouse:9000
+        database: gitintel
+        logs_table_name: otel_logs
+        traces_table_name: otel_traces
+        metrics_table_name: otel_metrics
+        ttl_days: 30
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhouse]
+        metrics:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [clickhouse]
+
+# ════════════════════════════════════════════════════════════════
+# Ingress
+# ════════════════════════════════════════════════════════════════
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+  hosts:
+    - host: gitintel.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+          service: web
+        - path: /api
+          pathType: Prefix
+          service: api
+        - path: /scim
+          pathType: Prefix
+          service: api
+  tls:
+    - secretName: gitintel-tls
+      hosts:
+        - gitintel.example.com
+
+# ════════════════════════════════════════════════════════════════
+# PostgreSQL (Bitnami subchart)
+# ════════════════════════════════════════════════════════════════
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: ""  # Set via secret
+    username: gitintel
+    password: ""  # Set via secret
+    database: gitintel
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+# External database (when postgresql.enabled=false)
+externalDatabase:
+  host: ""
+  port: 5432
+  database: gitintel
+  username: gitintel
+  password: ""
+  existingSecret: ""
+  existingSecretPasswordKey: password
+
+# ════════════════════════════════════════════════════════════════
+# Redis (Bitnami subchart)
+# ════════════════════════════════════════════════════════════════
+redis:
+  enabled: true
+  auth:
+    enabled: true
+    password: ""  # Set via secret
+  master:
+    persistence:
+      enabled: true
+      size: 2Gi
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+# External Redis (when redis.enabled=false)
+externalRedis:
+  host: ""
+  port: 6379
+  password: ""
+  existingSecret: ""
+  existingSecretPasswordKey: password
+
+# ════════════════════════════════════════════════════════════════
+# ClickHouse (for OTel storage)
+# ════════════════════════════════════════════════════════════════
+clickhouse:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: "23.12"
+    pullPolicy: IfNotPresent
+
+  persistence:
+    enabled: true
+    size: 50Gi
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 200m
+      memory: 512Mi
+
+# ════════════════════════════════════════════════════════════════
+# Authentication (Clerk)
+# ════════════════════════════════════════════════════════════════
+auth:
+  clerk:
+    publishableKey: ""  # pk_live_...
+    secretKey: ""  # sk_live_...
+    existingSecret: ""
+  # For enterprise SSO
+  saml:
+    enabled: false
+    idpMetadataUrl: ""
+  oidc:
+    enabled: false
+    issuer: ""
+    clientId: ""
+    clientSecret: ""
+
+# ════════════════════════════════════════════════════════════════
+# Service Account
+# ════════════════════════════════════════════════════════════════
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+# ════════════════════════════════════════════════════════════════
+# Pod Security
+# ════════════════════════════════════════════════════════════════
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ════════════════════════════════════════════════════════════════
+# Node Selection
+# ════════════════════════════════════════════════════════════════
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# ════════════════════════════════════════════════════════════════
+# Monitoring
+# ════════════════════════════════════════════════════════════════
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: ""
+    interval: 30s
+    scrapeTimeout: 10s
+  prometheusRule:
+    enabled: false
+    namespace: ""

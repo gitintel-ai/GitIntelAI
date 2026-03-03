@@ -1,0 +1,34 @@
+apiVersion: v2
+name: gitintel
+description: GitIntel - Git-native AI adoption tracking, cost intelligence & context optimization
+
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+keywords:
+  - ai
+  - git
+  - tracking
+  - cost
+  - devops
+  - claude
+  - openai
+
+home: https://gitintel.com
+sources:
+  - https://github.com/acme/gitintel
+
+maintainers:
+  - name: GitIntel Team
+    email: team@gitintel.com
+
+dependencies:
+  - name: postgresql
+    version: "13.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+  - name: redis
+    version: "18.x.x"
+    repository: https://charts.bitnami.com/bitnami
+    condition: redis.enabled

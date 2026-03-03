@@ -49,8 +49,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: devaudit-linux-amd64
-          path: packages/cli/target/release/devaudit
+          name: gitintel-linux-amd64
+          path: packages/cli/target/release/gitintel
 
   # ════════════════════════════════════════════════════════════════
   # API Server (Bun)
@@ -67,7 +67,7 @@ jobs:
         image: postgres:16-alpine
         env:
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: devaudit_test
+          POSTGRES_DB: gitintel_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -96,7 +96,7 @@ jobs:
       - name: Run tests
         run: bun test
         env:
-          DATABASE_URL: postgresql://postgres:test@localhost:5432/devaudit_test
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
 
   # ════════════════════════════════════════════════════════════════
   # Dashboard (Next.js)
@@ -153,7 +153,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: bunx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium firefox
 
       - name: Build dashboard
         run: bun run build
@@ -162,7 +162,7 @@ jobs:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
 
       - name: Run E2E tests
-        run: bunx playwright test --project=chromium
+        run: bunx playwright test --project=chromium --project=firefox
         env:
           CI: true
 
@@ -180,6 +180,75 @@ jobs:
         with:
           name: playwright-results
           path: packages/dashboard/test-results/
+          retention-days: 14
+
+  # ════════════════════════════════════════════════════════════════
+  # Integration E2E (Playwright + real API + Postgres)
+  # ════════════════════════════════════════════════════════════════
+  e2e-integration:
+    name: Integration E2E
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: gitintel_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd packages/core && bun install --frozen-lockfile
+          cd ../server && bun install --frozen-lockfile
+          cd ../dashboard && bun install --frozen-lockfile
+
+      - name: Push DB schema
+        run: cd packages/server && bunx drizzle-kit push
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
+
+      - name: Seed test data
+        run: cd packages/dashboard && bun run e2e-integration/seed.ts
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
+
+      - name: Build dashboard
+        run: cd packages/dashboard && bun run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
+
+      - name: Install Playwright browsers
+        run: cd packages/dashboard && bunx playwright install --with-deps chromium
+
+      - name: Run integration E2E tests
+        run: cd packages/dashboard && bunx playwright test --config=playwright.integration.config.ts
+        env:
+          CI: true
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
+          NODE_ENV: test
+
+      - name: Upload integration report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report-integration
+          path: packages/dashboard/playwright-report-integration/
           retention-days: 14
 
   # ════════════════════════════════════════════════════════════════
@@ -208,12 +277,60 @@ jobs:
         run: bun test
 
   # ════════════════════════════════════════════════════════════════
+  # Preview Deploy (gated on E2E passing)
+  # ════════════════════════════════════════════════════════════════
+  preview-deploy:
+    name: Preview Deploy
+    runs-on: ubuntu-latest
+    needs: [e2e, e2e-integration]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: |
+          cd packages/core && bun install --frozen-lockfile
+          cd ../dashboard && bun install --frozen-lockfile
+
+      - name: Build
+        run: cd packages/dashboard && bun run build
+        env:
+          NEXT_PUBLIC_API_URL: https://api-preview.gitintel.com
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_PREVIEW }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: gitintel-dashboard
+          directory: packages/dashboard/.next
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## Preview Deployment\n\nYour preview is ready!\n\n**Dashboard:** https://gitintel-dashboard-${context.payload.pull_request.number}.pages.dev\n\n_Deployed after all E2E tests passed._`
+            })
+
+  # ════════════════════════════════════════════════════════════════
   # Docker Build
   # ════════════════════════════════════════════════════════════════
   docker:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [cli, server, dashboard, e2e]
+    needs: [cli, server, dashboard, e2e, e2e-integration, core]
 
     steps:
       - uses: actions/checkout@v4
@@ -227,7 +344,7 @@ jobs:
           context: .
           file: infra/docker/Dockerfile.cli
           push: false
-          tags: devaudit/cli:test
+          tags: gitintel/cli:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -237,7 +354,7 @@ jobs:
           context: .
           file: infra/docker/Dockerfile.server
           push: false
-          tags: devaudit/server:test
+          tags: gitintel/server:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -247,6 +364,6 @@ jobs:
           context: .
           file: infra/docker/Dockerfile.dashboard
           push: false
-          tags: devaudit/dashboard:test
+          tags: gitintel/dashboard:test
           cache-from: type=gha
           cache-to: type=gha,mode=max

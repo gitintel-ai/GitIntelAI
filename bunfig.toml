@@ -1,0 +1,13 @@
+# Bun configuration for GitIntel monorepo
+
+[install]
+# Use exact versions
+exact = true
+
+[install.lockfile]
+# Save lockfile
+save = true
+
+[run]
+# Default shell
+shell = "system"

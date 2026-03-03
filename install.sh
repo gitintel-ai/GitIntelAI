@@ -1,10 +1,10 @@
 #!/bin/sh
 # GitIntel AI — installer
-# https://github.com/gitintel-ai/gitintel
+# https://github.com/gitintel-ai/GitIntelAI
 #
 # Usage:
 #   curl -fsSL https://gitintel.com/install | sh
-#   curl -fsSL https://raw.githubusercontent.com/gitintel-ai/gitintel/main/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/gitintel-ai/GitIntelAI/main/install.sh | sh
 #
 # Options (env vars):
 #   GITINTEL_INSTALL_DIR  — destination directory (default: ~/.local/bin)
@@ -12,7 +12,7 @@
 
 set -e
 
-REPO="gitintel-ai/gitintel"
+REPO="gitintel-ai/GitIntelAI"
 BIN_NAME="gitintel"
 INSTALL_DIR="${GITINTEL_INSTALL_DIR:-$HOME/.local/bin}"
 

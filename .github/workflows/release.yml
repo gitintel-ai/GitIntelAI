@@ -90,14 +90,14 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Sync version from git tag
+      - name: Publish
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          cd packages/cli-npm
+          # Copy outside the monorepo so npm doesn't see workspace:* deps in sibling packages
+          cp -r packages/cli-npm /tmp/gitintel-cli
+          cd /tmp/gitintel-cli
           npm version "$VERSION" --no-git-tag-version --allow-same-version
-
-      - name: Publish
-        run: cd packages/cli-npm && npm publish --access public
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

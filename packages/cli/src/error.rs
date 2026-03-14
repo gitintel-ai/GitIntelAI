@@ -49,6 +49,12 @@ pub enum GitIntelError {
     #[error("Hook error: {0}")]
     Hook(String),
 
+    #[error("Network error: {0}")]
+    Network(String),
+
+    #[error("{0}")]
+    Generic(String),
+
     #[error("{0}")]
     Other(String),
 }

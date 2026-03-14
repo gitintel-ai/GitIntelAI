@@ -100,6 +100,29 @@
 | D1-8 | Budget alert configuration UI                     | Agent-5 | ✅     |
 | D1-9 | Context optimizer suggestions panel               | Agent-5 | ✅     |
 
+## Phase 7: Distribution (Phase 2 from PRODUCT_STRATEGY.md)
+
+| ID   | Task                                                                           | Agent   | Status |
+|------|--------------------------------------------------------------------------------|---------|--------|
+| D2-1 | Pre-built binaries CI pipeline (Linux x64/ARM64, macOS x64/ARM64, Win x64)    | Agent-0 | ✅     |
+| D2-2 | GitHub Releases auto-publish on `git tag v*`                                   | Agent-0 | ✅     |
+| D2-3 | `install.sh` — one-liner install script (macOS + Linux)                        | Agent-0 | ✅     |
+| D2-4 | `install.ps1` — Windows PowerShell installer with ARM64 detection              | Agent-0 | ✅     |
+| D2-5 | Homebrew formula `Formula/gitintel.rb` + release CI auto-updates checksums     | Agent-0 | ✅     |
+| D2-6 | npm wrapper `@gitintel/cli` — downloads correct pre-built binary on install    | Agent-0 | ✅     |
+| D2-7 | `gitintel update` — self-update command (checks GitHub Releases, replaces bin) | Agent-0 | ✅     |
+| D2-8 | gitintel.ai marketing site                                                     | Agent-5 | 🔲     |
+
+## Phase 8: Auto-Attribution (Phase 3 from PRODUCT_STRATEGY.md)
+
+| ID   | Task                                                                                      | Agent   | Status |
+|------|-------------------------------------------------------------------------------------------|---------|--------|
+| A3-1 | Claude Code PostToolUse hook install in `gitintel init` → `~/.claude/settings.json`      | Agent-0 | ✅     |
+| A3-2 | `gitintel hooks run claude-post-tool-use` handler reads stdin JSON → calls checkpoint     | Agent-0 | ✅     |
+| A3-3 | Git diff semantic analysis — infer AI-written hunks when no checkpoint exists             | Agent-1 | 🔲     |
+| A3-4 | VS Code extension — auto-checkpoint for GitHub Copilot                                    | Agent-0 | 🔲     |
+| A3-5 | Cursor integration — parse `.cursor/` session data for automatic attribution              | Agent-1 | 🔲     |
+
 ## Phase 6: Enterprise
 
 | ID   | Task                                              | Agent   | Status |

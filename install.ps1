@@ -2,7 +2,7 @@
 # https://github.com/gitintel-ai/GitIntelAI
 #
 # Usage:
-#   irm https://gitintel.com/install.ps1 | iex
+#   irm https://gitintel.ai/install.ps1 | iex
 #   irm https://raw.githubusercontent.com/gitintel-ai/GitIntelAI/main/install.ps1 | iex
 #
 # Options (env vars):
@@ -16,9 +16,13 @@ $BinName    = 'gitintel.exe'
 $InstallDir = if ($env:GITINTEL_INSTALL_DIR) { $env:GITINTEL_INSTALL_DIR } else { "$env:LOCALAPPDATA\gitintel\bin" }
 
 # ── Detect architecture ────────────────────────────────────────────────────────
-$Arch = if ([System.Environment]::Is64BitOperatingSystem) { 'amd64' } else {
-    Write-Error "Only 64-bit Windows is supported. Please build from source."
-    exit 1
+$Arch = switch ($env:PROCESSOR_ARCHITECTURE) {
+    'AMD64' { 'amd64' }
+    'ARM64' { 'arm64' }
+    default {
+        Write-Error "Unsupported architecture: $env:PROCESSOR_ARCHITECTURE. Please build from source."
+        exit 1
+    }
 }
 
 $Artifact = "gitintel-windows-$Arch.exe"
@@ -77,5 +81,5 @@ if ($UserPath -notlike "*$InstallDir*") {
 Write-Host ""
 Write-Host "  Run 'gitintel --version' to verify."
 Write-Host "  Run 'gitintel init' inside a git repo to get started."
-Write-Host "  Docs: https://gitintel.com/docs/getting-started"
+Write-Host "  Docs: https://gitintel.ai/docs/getting-started"
 Write-Host ""

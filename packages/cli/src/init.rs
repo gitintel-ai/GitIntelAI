@@ -123,7 +123,7 @@ fn configure_claude_code_hooks() -> std::result::Result<bool, Box<dyn std::error
                             cmds.iter().any(|cmd| {
                                 cmd.get("command")
                                     .and_then(|c| c.as_str())
-                                    .map(|s| s.contains("gitintel checkpoint"))
+                                    .map(|s| s.contains("gitintel hooks run claude-post-tool-use") || s.contains("gitintel checkpoint"))
                                     .unwrap_or(false)
                             })
                         })
@@ -136,13 +136,16 @@ fn configure_claude_code_hooks() -> std::result::Result<bool, Box<dyn std::error
         }
     }
 
-    // Build the hook entry
+    // Build the hook entry.
+    // `gitintel hooks run claude-post-tool-use` reads the PostToolUse JSON
+    // payload from stdin and calls `gitintel checkpoint` with the real file
+    // path and session metadata — no shell env var guessing required.
     let hook_entry = serde_json::json!({
         "matcher": "Write|Edit|MultiEdit",
         "hooks": [
             {
                 "type": "command",
-                "command": "gitintel checkpoint --agent \"Claude Code\" --model \"${CLAUDE_MODEL:-unknown}\" --session-id \"${CLAUDE_SESSION_ID:-no-session}\" --file \"${CLAUDE_FILE_PATH:-.}\" --lines \"1-999\" --tokens-in \"${CLAUDE_TOKENS_IN:-0}\" --tokens-out \"${CLAUDE_TOKENS_OUT:-0}\" --cost-usd \"${CLAUDE_COST_USD:-0.0}\""
+                "command": "gitintel hooks run claude-post-tool-use"
             }
         ]
     });

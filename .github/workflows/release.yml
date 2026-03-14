@@ -93,7 +93,71 @@ jobs:
           files: gitintel-*
           generate_release_notes: true
 
-  # ── 3. Publish to npm ─────────────────────────────────────────────────────
+  # ── 3. Update Homebrew tap ────────────────────────────────────────────────
+  homebrew:
+    name: Update Homebrew tap
+    needs: release
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Compute checksums and update formula
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          sha_macos_arm64=$(sha256sum gitintel-macos-arm64   | awk '{print $1}')
+          sha_macos_amd64=$(sha256sum gitintel-macos-amd64   | awk '{print $1}')
+          sha_linux_arm64=$(sha256sum gitintel-linux-arm64   | awk '{print $1}')
+          sha_linux_amd64=$(sha256sum gitintel-linux-amd64   | awk '{print $1}')
+
+          # Write checksums file for the release assets
+          echo "$sha_macos_arm64  gitintel-macos-arm64"   >> checksums.sha256
+          echo "$sha_macos_amd64  gitintel-macos-amd64"   >> checksums.sha256
+          echo "$sha_linux_arm64  gitintel-linux-arm64"   >> checksums.sha256
+          echo "$sha_linux_amd64  gitintel-linux-amd64"   >> checksums.sha256
+          sha256sum gitintel-windows-amd64.exe           >> checksums.sha256
+
+          # Patch the formula
+          sed -i "s/version \".*\"/version \"$VERSION\"/"                               Formula/gitintel.rb
+          sed -i "s/PLACEHOLDER_MACOS_ARM64_SHA256/$sha_macos_arm64/"                   Formula/gitintel.rb
+          sed -i "s/PLACEHOLDER_MACOS_AMD64_SHA256/$sha_macos_amd64/"                   Formula/gitintel.rb
+          sed -i "s/PLACEHOLDER_LINUX_ARM64_SHA256/$sha_linux_arm64/"                   Formula/gitintel.rb
+          sed -i "s/PLACEHOLDER_LINUX_AMD64_SHA256/$sha_linux_amd64/"                   Formula/gitintel.rb
+
+      - name: Upload checksums to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: checksums.sha256
+
+      - name: Push formula to homebrew-tap repo
+        env:
+          TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          if [ -z "$TAP_DEPLOY_KEY" ]; then
+            echo "HOMEBREW_TAP_DEPLOY_KEY not set — skipping tap push"
+            exit 0
+          fi
+
+          eval "$(ssh-agent -s)"
+          echo "$TAP_DEPLOY_KEY" | ssh-add -
+
+          git config --global user.email "ci@gitintel.ai"
+          git config --global user.name "GitIntel CI"
+
+          git clone git@github.com:gitintel-ai/homebrew-tap.git /tmp/homebrew-tap
+          cp Formula/gitintel.rb /tmp/homebrew-tap/Formula/gitintel.rb
+          cd /tmp/homebrew-tap
+          git add Formula/gitintel.rb
+          git commit -m "gitintel ${GITHUB_REF#refs/tags/}"
+          git push
+
+  # ── 4. Publish to npm ─────────────────────────────────────────────────────
   npm:
     name: Publish npm
     needs: release

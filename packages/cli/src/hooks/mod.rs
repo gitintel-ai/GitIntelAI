@@ -153,6 +153,7 @@ pub async fn run_hook(hook_name: &str, hook_args: &[String]) -> Result<()> {
             run_post_rewrite(cause).await
         }
         "post-merge" => run_post_merge().await,
+        "claude-post-tool-use" => crate::claude_hooks::handle_post_tool_use().await,
         unknown => {
             tracing::warn!("Unknown gitintel hook: {}", unknown);
             Ok(())

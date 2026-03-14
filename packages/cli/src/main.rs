@@ -5,6 +5,7 @@
 
 mod blame;
 mod checkpoint;
+mod claude_hooks;
 mod config;
 mod context;
 mod cost;

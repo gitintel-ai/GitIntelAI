@@ -111,3 +111,18 @@
 | E1-5 | Audit log (all API mutations)                     | Agent-4 | ✅     |
 | E1-6 | API key management (CI/CD integration)            | Agent-4 | ✅     |
 | E1-7 | SCIM provisioning endpoint                        | Agent-4 | ✅     |
+
+## Phase 7: PM Gap Fixes (Distribution + Auto Attribution)
+
+> Gaps identified in PRODUCT_STRATEGY.md — Priority: P0/P1
+
+| ID   | Task                                                          | Agent   | Status |
+|------|---------------------------------------------------------------|---------|--------|
+| G1-1 | Claude Code PostToolUse auto-checkpoint (init.rs)             | Agent-0 | ✅     |
+| G1-2 | `gitintel update` self-update command                         | Agent-0 | ✅     |
+| G1-3 | Windows PowerShell install script (install.ps1)               | Agent-0 | ✅     |
+| G1-4 | Fix npm package name to `@gitintel/cli`                       | Agent-0 | ✅     |
+| G1-5 | Homebrew tap setup (`gitintel-ai/homebrew-tap`)               | Agent-0 | 🔲     |
+| G1-6 | `gitintel.ai` marketing landing page                          | Agent-0 | 🔲     |
+| G1-7 | Git diff semantic analysis for auto-attribution (no checkpoint)| Agent-0 | 🔲     |
+| G1-8 | Hosted SaaS `app.gitintel.ai` — cloud sync target             | Agent-0 | 🔲     |

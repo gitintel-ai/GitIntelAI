@@ -16,6 +16,7 @@ mod proxy;
 mod stats;
 mod store;
 mod sync;
+mod update;
 
 use clap::{Parser, Subcommand};
 use colored::Colorize;
@@ -178,6 +179,13 @@ enum Commands {
         /// Set a configuration value
         #[arg(long)]
         set: Option<String>,
+    },
+
+    /// Check for and install CLI updates
+    Update {
+        /// Only check, do not install
+        #[arg(long)]
+        check: bool,
     },
 }
 
@@ -406,6 +414,8 @@ async fn main() -> ExitCode {
         },
 
         Some(Commands::Config { json, set }) => config::run(json, set.as_deref()).await,
+
+        Some(Commands::Update { check }) => update::run(check).await,
 
         None => {
             println!("{}", "GitIntel CLI - Git-native AI adoption tracking".green());

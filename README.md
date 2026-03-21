@@ -33,7 +33,7 @@ brew install gitintel-ai/tap/gitintel
 irm https://gitintel.com/install.ps1 | iex
 
 # npm (any platform)
-npx @gitintel/cli
+npx @gitintel-cli/gitintel
 ```
 
 <details>

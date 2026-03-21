@@ -75,7 +75,7 @@ export default function GettingStartedPage() {
         <div className="rounded-lg border p-4">
           <p className="text-sm font-semibold mb-1">npm <span className="text-xs font-normal text-muted-foreground">— all platforms</span></p>
           <div className="rounded bg-muted p-3 font-mono text-xs">
-            npm install -g @gitintel/cli
+            npm install -g @gitintel-cli/gitintel
           </div>
           <p className="mt-2 text-xs text-muted-foreground">Works on macOS, Linux, and Windows. No build tools required.</p>
         </div>

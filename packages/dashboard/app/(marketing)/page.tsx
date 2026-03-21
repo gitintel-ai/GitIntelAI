@@ -754,7 +754,7 @@ export default function LandingPage() {
               <span className="text-xs text-muted-foreground">or</span>
               <div className="inline-flex items-center gap-2 rounded-lg border bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
                 <span className="text-green-600 dark:text-green-400">$</span>
-                <span>npm install -g @gitintel/cli</span>
+                <span>npm install -g @gitintel-cli/gitintel</span>
               </div>
             </div>
           </div>

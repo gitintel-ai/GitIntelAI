@@ -10,7 +10,7 @@ const binPath = path.join(__dirname, binName);
 
 if (!fs.existsSync(binPath)) {
   console.error('gitintel binary not found.');
-  console.error('Try reinstalling:  npm install -g @gitintel/cli');
+  console.error('Try reinstalling:  npm install -g @gitintel-cli/gitintel');
   console.error('Or build from source: https://github.com/gitintel-ai/GitIntelAI');
   process.exit(1);
 }

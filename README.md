@@ -4,29 +4,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0--beta-blue)](packages/cli/Cargo.toml)
 [![Rust](https://img.shields.io/badge/built%20with-Rust-orange)](https://www.rust-lang.org)
+[![GitHub stars](https://img.shields.io/github/stars/gitintel-ai/GitIntelAI?style=social)](https://github.com/gitintel-ai/GitIntelAI)
 
 > Do you know how much of your codebase is AI-generated?
 
 GitIntel tracks AI authorship in your git history -- line by line, commit by commit.
 **The missing `git blame` for AI code.**
 
-<!-- TODO: Replace with actual demo GIF after first release -->
-<!-- ![GitIntel Demo](demo/hero.gif) -->
-
-```
-$ gitintel scan
-  Commits scanned:     312
-  AI-assisted commits: 127 (40.7%)
-  Agents: Claude Code (89), Cursor (24), Copilot (14)
-
-$ gitintel blame src/api.ts
-   1 [AI]  dc69ba8  Alice Chen  export async function createUser(
-   2 [AI]  dc69ba8  Alice Chen    data: CreateUserInput,
-  ...
-  55 [AI]  dc69ba8  Alice Chen  }
-  56 [HU]  dc69ba8  Alice Chen  // Hand-written validation
-  57 [HU]  dc69ba8  Alice Chen  function validateEmail(email: string) {
-```
+<p align="center">
+  <img src="demo/hero.svg" alt="GitIntel Demo — scan, blame, stats" width="800">
+</p>
 
 ## The Problem
 
@@ -219,6 +206,16 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
 ## License
 
 MIT -- see [LICENSE](LICENSE).
+
+## Star History
+
+<a href="https://star-history.com/#gitintel-ai/GitIntelAI&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=gitintel-ai/GitIntelAI&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=gitintel-ai/GitIntelAI&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=gitintel-ai/GitIntelAI&type=Date" />
+ </picture>
+</a>
 
 ---
 

@@ -93,8 +93,12 @@ fn get_commit_cost(db: &Database, sha: &str) -> Result<CostSummary> {
 
     if let Some(a) = attr {
         summary.ai_lines = a.ai_lines as i64;
-        summary.total_lines = a.total_lines as i64;
-        summary.ai_percentage = a.ai_pct;
+        summary.total_lines = (a.total_lines as i64).max(a.ai_lines as i64);
+        summary.ai_percentage = if summary.total_lines > 0 {
+            ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0).clamp(0.0, 100.0)
+        } else {
+            0.0
+        };
         summary.total_cost_usd = a.total_cost_usd;
         summary.developer = Some(a.author_email);
     }
@@ -168,8 +172,12 @@ fn get_branch_cost(db: &Database, config: &Config, branch: &str) -> Result<CostS
         }
     }
 
+    if summary.total_lines < summary.ai_lines {
+        summary.total_lines = summary.ai_lines;
+    }
     if summary.total_lines > 0 {
-        summary.ai_percentage = (summary.ai_lines as f64 / summary.total_lines as f64) * 100.0;
+        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
+            .clamp(0.0, 100.0);
     }
 
     Ok(summary)
@@ -210,8 +218,12 @@ fn get_developer_cost(db: &Database, developer: &str, since: Option<&str>) -> Re
 
     populate_cost_breakdowns(&mut summary, model_costs, agent_costs);
 
+    if summary.total_lines < summary.ai_lines {
+        summary.total_lines = summary.ai_lines;
+    }
     if summary.total_lines > 0 {
-        summary.ai_percentage = (summary.ai_lines as f64 / summary.total_lines as f64) * 100.0;
+        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
+            .clamp(0.0, 100.0);
     }
 
     Ok(summary)
@@ -254,8 +266,12 @@ fn get_period_cost(db: &Database, period: &str) -> Result<CostSummary> {
 
     populate_cost_breakdowns(&mut summary, model_costs, agent_costs);
 
+    if summary.total_lines < summary.ai_lines {
+        summary.total_lines = summary.ai_lines;
+    }
     if summary.total_lines > 0 {
-        summary.ai_percentage = (summary.ai_lines as f64 / summary.total_lines as f64) * 100.0;
+        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
+            .clamp(0.0, 100.0);
     }
 
     Ok(summary)

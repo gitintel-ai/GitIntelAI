@@ -132,15 +132,24 @@ pub async fn run(
     }
     stats.scanned_commits = scanned_count;
 
-    // Calculate percentages
+    // Ensure total_lines >= ai_lines (checkpoint ranges can slightly exceed
+    // actual file length, and root commits may store total_lines=0)
+    if stats.total_lines < stats.ai_lines {
+        stats.total_lines = stats.ai_lines;
+    }
+    stats.human_lines = stats.total_lines - stats.ai_lines;
+
+    // Calculate percentages (clamp to 0..100)
     if stats.total_lines > 0 {
-        stats.ai_percentage = (stats.ai_lines as f64 / stats.total_lines as f64) * 100.0;
+        stats.ai_percentage = ((stats.ai_lines as f64 / stats.total_lines as f64) * 100.0)
+            .clamp(0.0, 100.0);
     }
 
     for dev_stats in dev_map.values_mut() {
         let total = dev_stats.ai_lines + dev_stats.human_lines;
         if total > 0 {
-            dev_stats.ai_percentage = (dev_stats.ai_lines as f64 / total as f64) * 100.0;
+            dev_stats.ai_percentage = ((dev_stats.ai_lines as f64 / total as f64) * 100.0)
+                .clamp(0.0, 100.0);
         }
     }
 

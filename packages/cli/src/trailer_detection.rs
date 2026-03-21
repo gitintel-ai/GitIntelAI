@@ -278,6 +278,36 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_trailers_human_coauthor_no_match() {
+        let msg = "Pair programmed\n\nCo-Authored-By: Jane Smith <jane@company.com>";
+        let matches = parse_trailers(msg);
+        assert!(matches.is_empty(), "Human co-authors should not match");
+    }
+
+    #[test]
+    fn test_parse_trailers_mixed_human_and_ai() {
+        let msg = "Collab commit\n\nCo-Authored-By: Jane Smith <jane@company.com>\nCo-Authored-By: Claude Code <noreply@anthropic.com>\nCo-Authored-By: Bob Dev <bob@dev.io>";
+        let matches = parse_trailers(msg);
+        assert_eq!(matches.len(), 1, "Only the AI co-author should match");
+        assert_eq!(matches[0].agent, "Claude Code");
+    }
+
+    #[test]
+    fn test_parse_trailers_case_insensitive_key() {
+        // Lowercase "co-authored-by"
+        let msg = "feat: add thing\n\nco-authored-by: Claude Code <noreply@anthropic.com>";
+        let matches = parse_trailers(msg);
+        assert_eq!(matches.len(), 1);
+        assert_eq!(matches[0].agent, "Claude Code");
+
+        // ALL CAPS
+        let msg2 = "feat: add thing\n\nCO-AUTHORED-BY: GitHub Copilot <copilot@github.com>";
+        let matches2 = parse_trailers(msg2);
+        assert_eq!(matches2.len(), 1);
+        assert_eq!(matches2[0].agent, "GitHub Copilot");
+    }
+
+    #[test]
     fn test_parse_shortstat() {
         assert_eq!(
             parse_shortstat(" 3 files changed, 45 insertions(+), 12 deletions(-)"),
@@ -294,8 +324,25 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_shortstat_deletions_only() {
+        assert_eq!(
+            parse_shortstat(" 2 files changed, 7 deletions(-)"),
+            (0, 7, 2)
+        );
+    }
+
+    #[test]
     fn test_parse_shortstat_empty() {
         assert_eq!(parse_shortstat(""), (0, 0, 0));
+    }
+
+    #[test]
+    fn test_parse_shortstat_singular() {
+        // "1 file changed, 1 insertion(+), 1 deletion(-)" — singular forms
+        assert_eq!(
+            parse_shortstat(" 1 file changed, 1 insertion(+), 1 deletion(-)"),
+            (1, 1, 1)
+        );
     }
 
     #[test]
@@ -306,5 +353,35 @@ mod tests {
         let now = chrono::Utc::now().timestamp();
         // Should be approximately 7 days ago (within a minute tolerance)
         assert!((now - epoch - 7 * 86400).abs() < 60);
+    }
+
+    #[test]
+    fn test_parse_since_weeks() {
+        let result = parse_since_to_epoch("2w");
+        assert!(result.is_ok());
+        let epoch = result.unwrap();
+        let now = chrono::Utc::now().timestamp();
+        assert!((now - epoch - 14 * 86400).abs() < 60);
+    }
+
+    #[test]
+    fn test_parse_since_months() {
+        let result = parse_since_to_epoch("3m");
+        assert!(result.is_ok());
+        let epoch = result.unwrap();
+        let now = chrono::Utc::now().timestamp();
+        assert!((now - epoch - 90 * 86400).abs() < 60);
+    }
+
+    #[test]
+    fn test_parse_since_iso_date() {
+        let result = parse_since_to_epoch("2024-01-15");
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parse_since_invalid() {
+        let result = parse_since_to_epoch("abc");
+        assert!(result.is_err());
     }
 }

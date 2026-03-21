@@ -104,11 +104,19 @@ pub async fn run(force: bool) -> Result<()> {
             );
         }
         Err(e) => {
-            println!(
-                "  {} Auto-scan skipped: {}",
-                "!".yellow(),
-                e
-            );
+            let msg = e.to_string();
+            if msg.contains("not found") || msg.contains("no reference") || msg.contains("HEAD") {
+                println!(
+                    "  {} No commit history found — scan will run after your first commit.",
+                    "→".yellow(),
+                );
+            } else {
+                println!(
+                    "  {} Auto-scan skipped: {}",
+                    "!".yellow(),
+                    msg
+                );
+            }
         }
     }
 

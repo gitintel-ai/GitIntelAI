@@ -130,11 +130,28 @@ pub async fn run() -> Result<()> {
     }
 
     // Get total lines changed in commit
+    // Try HEAD~1..HEAD first; for root commits (no parent), fall back to
+    // `diff-tree --shortstat HEAD` which works on the initial commit.
     let output = Command::new(&config.git_path)
         .args(["diff", "--shortstat", "HEAD~1..HEAD"])
         .output()?;
     let diff_stat = String::from_utf8_lossy(&output.stdout);
-    let total_lines = parse_diff_stat_lines(&diff_stat);
+    let mut total_lines = parse_diff_stat_lines(&diff_stat);
+
+    if total_lines == 0 {
+        // Root commit or diff failed — try diff-tree which handles initial commits
+        let output2 = Command::new(&config.git_path)
+            .args(["diff-tree", "--shortstat", "--root", "HEAD"])
+            .output()?;
+        let diff_stat2 = String::from_utf8_lossy(&output2.stdout);
+        total_lines = parse_diff_stat_lines(&diff_stat2);
+    }
+
+    // Ensure total_lines is at least as large as ai_lines (checkpoint ranges
+    // may slightly exceed the file length if recorded before final write)
+    if total_lines < total_ai_lines {
+        total_lines = total_ai_lines;
+    }
 
     let human_lines = total_lines.saturating_sub(total_ai_lines);
     let ai_pct = if total_lines > 0 {
@@ -330,5 +347,36 @@ mod tests {
         let merged = merge_ranges(&ranges);
         let total: i32 = merged.iter().map(|(s, e)| e - s + 1).sum();
         assert_eq!(total, 80, "Should be 80, not 130");
+    }
+
+    // --- parse_diff_stat_lines tests ---
+
+    #[test]
+    fn test_parse_diff_stat_full() {
+        let stat = " 3 files changed, 45 insertions(+), 12 deletions(-)";
+        assert_eq!(parse_diff_stat_lines(stat), 57); // 45 + 12
+    }
+
+    #[test]
+    fn test_parse_diff_stat_insertions_only() {
+        let stat = " 1 file changed, 20 insertions(+)";
+        assert_eq!(parse_diff_stat_lines(stat), 20);
+    }
+
+    #[test]
+    fn test_parse_diff_stat_deletions_only() {
+        let stat = " 2 files changed, 5 deletions(-)";
+        assert_eq!(parse_diff_stat_lines(stat), 5);
+    }
+
+    #[test]
+    fn test_parse_diff_stat_empty() {
+        assert_eq!(parse_diff_stat_lines(""), 0);
+    }
+
+    #[test]
+    fn test_parse_diff_stat_singular() {
+        let stat = " 1 file changed, 1 insertion(+), 1 deletion(-)";
+        assert_eq!(parse_diff_stat_lines(stat), 2);
     }
 }

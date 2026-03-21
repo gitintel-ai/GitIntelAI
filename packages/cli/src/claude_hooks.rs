@@ -233,3 +233,109 @@ fn ranges_to_string(lines: &[usize]) -> String {
     ranges.push(format!("{start}-{end}"));
     ranges.join(",")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- find_substring_line_range tests ---
+
+    #[test]
+    fn test_find_substring_at_start() {
+        let haystack = "hello\nworld\nfoo";
+        let result = find_substring_line_range(haystack, "hello");
+        assert_eq!(result, Some("1-1".to_string()));
+    }
+
+    #[test]
+    fn test_find_substring_middle_line() {
+        let haystack = "line1\nline2\nline3\nline4";
+        let result = find_substring_line_range(haystack, "line2");
+        assert_eq!(result, Some("2-2".to_string()));
+    }
+
+    #[test]
+    fn test_find_substring_multiline_needle() {
+        let haystack = "aaa\nbbb\nccc\nddd\neee";
+        let result = find_substring_line_range(haystack, "ccc\nddd");
+        assert_eq!(result, Some("3-4".to_string()));
+    }
+
+    #[test]
+    fn test_find_substring_not_found() {
+        let haystack = "aaa\nbbb\nccc";
+        let result = find_substring_line_range(haystack, "zzz");
+        assert_eq!(result, None);
+    }
+
+    #[test]
+    fn test_find_substring_entire_file() {
+        let haystack = "only line";
+        let result = find_substring_line_range(haystack, "only line");
+        assert_eq!(result, Some("1-1".to_string()));
+    }
+
+    // --- diff_changed_lines tests ---
+
+    #[test]
+    fn test_diff_no_changes() {
+        let old = "aaa\nbbb\nccc";
+        let new = "aaa\nbbb\nccc";
+        assert!(diff_changed_lines(old, new).is_empty());
+    }
+
+    #[test]
+    fn test_diff_one_line_changed() {
+        let old = "aaa\nbbb\nccc";
+        let new = "aaa\nBBB\nccc";
+        assert_eq!(diff_changed_lines(old, new), vec![2]);
+    }
+
+    #[test]
+    fn test_diff_lines_added() {
+        let old = "aaa\nbbb";
+        let new = "aaa\nbbb\nccc\nddd";
+        assert_eq!(diff_changed_lines(old, new), vec![3, 4]);
+    }
+
+    #[test]
+    fn test_diff_all_changed() {
+        let old = "aaa\nbbb";
+        let new = "xxx\nyyy";
+        assert_eq!(diff_changed_lines(old, new), vec![1, 2]);
+    }
+
+    #[test]
+    fn test_diff_empty_old() {
+        let old = "";
+        let new = "aaa\nbbb";
+        assert_eq!(diff_changed_lines(old, new), vec![1, 2]);
+    }
+
+    // --- ranges_to_string tests ---
+
+    #[test]
+    fn test_ranges_consecutive() {
+        assert_eq!(ranges_to_string(&[1, 2, 3, 4, 5]), "1-5");
+    }
+
+    #[test]
+    fn test_ranges_with_gaps() {
+        assert_eq!(ranges_to_string(&[1, 2, 3, 7, 8, 12]), "1-3,7-8,12-12");
+    }
+
+    #[test]
+    fn test_ranges_single_element() {
+        assert_eq!(ranges_to_string(&[42]), "42-42");
+    }
+
+    #[test]
+    fn test_ranges_empty() {
+        assert_eq!(ranges_to_string(&[]), "0-0");
+    }
+
+    #[test]
+    fn test_ranges_all_isolated() {
+        assert_eq!(ranges_to_string(&[1, 5, 10]), "1-1,5-5,10-10");
+    }
+}

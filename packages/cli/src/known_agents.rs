@@ -93,14 +93,18 @@ mod tests {
     fn test_copilot() {
         let result = match_agent("GitHub Copilot <copilot@github.com>");
         assert!(result.is_some());
-        assert_eq!(result.unwrap().0, "GitHub Copilot");
+        let (name, confidence) = result.unwrap();
+        assert_eq!(name, "GitHub Copilot");
+        assert_eq!(confidence, 1.0); // email match
     }
 
     #[test]
     fn test_cursor() {
         let result = match_agent("Cursor AI <cursor@cursor.com>");
         assert!(result.is_some());
-        assert_eq!(result.unwrap().0, "Cursor");
+        let (name, confidence) = result.unwrap();
+        assert_eq!(name, "Cursor");
+        assert_eq!(confidence, 1.0); // email match
     }
 
     #[test]
@@ -114,5 +118,106 @@ mod tests {
     fn test_no_match() {
         let result = match_agent("John Doe <john@example.com>");
         assert!(result.is_none());
+    }
+
+    #[test]
+    fn test_amazon_q_developer() {
+        let result = match_agent("Amazon Q Developer <noreply@amazon.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Amazon Q Developer");
+    }
+
+    #[test]
+    fn test_codewhisperer_maps_to_amazon_q() {
+        let result = match_agent("CodeWhisperer <codewhisperer@aws.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Amazon Q Developer");
+    }
+
+    #[test]
+    fn test_windsurf() {
+        let result = match_agent("Windsurf AI <windsurf@example.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Windsurf");
+    }
+
+    #[test]
+    fn test_codeium_email() {
+        let result = match_agent("Codeium <codeium@codeium.com>");
+        assert!(result.is_some());
+        let (name, _confidence) = result.unwrap();
+        assert_eq!(name, "Codeium");
+        // Note: "codeium" name pattern matches before email, so confidence is 0.9
+    }
+
+    #[test]
+    fn test_gemini() {
+        let result = match_agent("Gemini Code Assist <gemini@google.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Gemini");
+    }
+
+    #[test]
+    fn test_devin() {
+        let result = match_agent("Devin <devin@cognition.ai>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Devin");
+    }
+
+    #[test]
+    fn test_devin_cognition_email() {
+        let result = match_agent("AI Agent <agent@cognition.ai>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "Devin");
+    }
+
+    #[test]
+    fn test_openai_codex() {
+        let result = match_agent("OpenAI Codex <codex@openai.com>");
+        assert!(result.is_some());
+        let (name, _confidence) = result.unwrap();
+        assert_eq!(name, "OpenAI Codex");
+        // Note: "openai codex" name pattern matches before email, so confidence is 0.9
+    }
+
+    #[test]
+    fn test_codex_cli() {
+        let result = match_agent("codex-cli <noreply@openai.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "OpenAI Codex");
+    }
+
+    #[test]
+    fn test_google_code_assist_email() {
+        let result = match_agent("Google <code-assist@google.com>");
+        assert!(result.is_some());
+        let (name, confidence) = result.unwrap();
+        assert_eq!(name, "Google Code Assist");
+        assert_eq!(confidence, 1.0);
+    }
+
+    #[test]
+    fn test_copilot_bot() {
+        let result = match_agent("copilot[bot] <noreply@github.com>");
+        assert!(result.is_some());
+        assert_eq!(result.unwrap().0, "GitHub Copilot");
+    }
+
+    #[test]
+    fn test_name_match_lower_confidence() {
+        // Name-only match (no email pattern) should give 0.9
+        let result = match_agent("Claude Code <user@custom-domain.com>");
+        assert!(result.is_some());
+        let (name, confidence) = result.unwrap();
+        assert_eq!(name, "Claude Code");
+        assert_eq!(confidence, 0.9);
+    }
+
+    #[test]
+    fn test_random_names_no_match() {
+        assert!(match_agent("Alice <alice@wonderland.com>").is_none());
+        assert!(match_agent("Bob Builder <bob@build.io>").is_none());
+        assert!(match_agent("CI Bot <ci@jenkins.io>").is_none());
+        assert!(match_agent("dependabot[bot] <noreply@github.com>").is_none());
     }
 }

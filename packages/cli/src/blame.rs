@@ -298,3 +298,110 @@ fn parse_authorship_log(content: &str, file: &str) -> Result<Vec<(usize, LineAtt
 
     Ok(results)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // --- parse_porcelain_blame tests ---
+
+    #[test]
+    fn test_parse_porcelain_basic() {
+        // Simulated porcelain output: commit line, author line, content line
+        let output = "\
+abc123def456abc123def456abc123def456abc12345 1 1 1
+author Alice
+\tlet x = 42;
+abc123def456abc123def456abc123def456abc12345 2 2
+\tlet y = 13;
+";
+        let lines = parse_porcelain_blame(output).unwrap();
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0].line_number, 1);
+        assert_eq!(lines[0].content, "let x = 42;");
+        assert_eq!(lines[0].author, "Alice");
+        assert_eq!(lines[0].attribution, LineAttribution::Unknown);
+        assert_eq!(lines[1].line_number, 2);
+        assert_eq!(lines[1].content, "let y = 13;");
+    }
+
+    #[test]
+    fn test_parse_porcelain_empty() {
+        let lines = parse_porcelain_blame("").unwrap();
+        assert!(lines.is_empty());
+    }
+
+    // --- parse_authorship_log tests ---
+
+    #[test]
+    fn test_parse_authorship_ai_lines() {
+        let yaml = r#"
+schema_version: "gitintel/1.0.0"
+agent_sessions:
+  - agent: "Claude Code"
+    model: "claude-opus-4-5"
+    files:
+      src/main.rs:
+        ai_lines:
+          - [1, 10]
+          - [20, 25]
+        human_lines:
+          - [11, 19]
+"#;
+        let result = parse_authorship_log(yaml, "src/main.rs").unwrap();
+        // AI lines: 1..=10 (10) + 20..=25 (6) = 16
+        // Human lines: 11..=19 (9)
+        let ai_count = result.iter().filter(|(_, a)| *a == LineAttribution::AI).count();
+        let human_count = result.iter().filter(|(_, a)| *a == LineAttribution::Human).count();
+        assert_eq!(ai_count, 16);
+        assert_eq!(human_count, 9);
+    }
+
+    #[test]
+    fn test_parse_authorship_mixed_lines() {
+        // A line that appears in both AI and human ranges should be Mixed
+        let yaml = r#"
+schema_version: "gitintel/1.0.0"
+agent_sessions:
+  - agent: "Claude Code"
+    model: "claude-opus-4-5"
+    files:
+      src/lib.rs:
+        ai_lines:
+          - [5, 10]
+        human_lines:
+          - [8, 15]
+"#;
+        let result = parse_authorship_log(yaml, "src/lib.rs").unwrap();
+        // Lines 8, 9, 10 should be Mixed (in both ai_lines and human_lines)
+        let mixed: Vec<_> = result.iter().filter(|(_, a)| *a == LineAttribution::Mixed).collect();
+        assert_eq!(mixed.len(), 3); // lines 8, 9, 10
+    }
+
+    #[test]
+    fn test_parse_authorship_file_not_found() {
+        let yaml = r#"
+schema_version: "gitintel/1.0.0"
+agent_sessions:
+  - agent: "Claude Code"
+    model: "claude-opus-4-5"
+    files:
+      src/other.rs:
+        ai_lines:
+          - [1, 5]
+        human_lines: []
+"#;
+        let result = parse_authorship_log(yaml, "src/main.rs").unwrap();
+        assert!(result.is_empty(), "File not in log should return empty");
+    }
+
+    // --- LineAttribution display tests ---
+
+    #[test]
+    fn test_line_attribution_display() {
+        assert_eq!(format!("{}", LineAttribution::Human), "H");
+        assert_eq!(format!("{}", LineAttribution::AI), "A");
+        assert_eq!(format!("{}", LineAttribution::Mixed), "M");
+        assert_eq!(format!("{}", LineAttribution::Unknown), "?");
+    }
+}

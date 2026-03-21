@@ -42,13 +42,13 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 
-# Claude Code session data
-.claude/
+# Claude Code worktree scratch data
+.claude/worktrees/
 
 # Local DB
 *.db
 *.db-shm
 *.db-wal
 
-# Internal docs (pricing, competitive intel, revenue targets)
-docs/internal/
+# Internal docs — sensitive files only
+docs/internal/REPO_CONTEXT.md

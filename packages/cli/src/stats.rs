@@ -17,6 +17,8 @@ pub struct Stats {
     pub ai_percentage: f64,
     pub total_cost_usd: f64,
     pub by_developer: Vec<DeveloperStats>,
+    pub checkpoint_commits: usize,
+    pub scanned_commits: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -68,6 +70,13 @@ pub async fn run(
         db.get_attributions_since(since_date)?
     };
 
+    // Collect commit SHAs from checkpoint-based attributions to avoid double-counting
+    let checkpoint_shas: std::collections::HashSet<String> = attributions
+        .iter()
+        .map(|a| a.commit_sha.clone())
+        .collect();
+    let checkpoint_count = attributions.len();
+
     // Calculate statistics
     let mut stats = Stats {
         period: since.to_string(),
@@ -78,6 +87,8 @@ pub async fn run(
         ai_percentage: 0.0,
         total_cost_usd: 0.0,
         by_developer: Vec::new(),
+        checkpoint_commits: checkpoint_count,
+        scanned_commits: 0,
     };
 
     // Aggregate by developer
@@ -103,6 +114,23 @@ pub async fn run(
         dev_stats.human_lines += attr.human_lines as i64;
         dev_stats.cost_usd += attr.total_cost_usd;
     }
+
+    // Merge scanned attributions (Co-Authored-By trailer detection)
+    // Only include commits NOT already in the checkpoint-based attributions table
+    let scanned_only = db.get_scanned_only_attributions()?;
+    let mut scanned_count = 0;
+    for scanned in &scanned_only {
+        if checkpoint_shas.contains(&scanned.commit_sha) {
+            continue; // Already counted via higher-fidelity checkpoint data
+        }
+        scanned_count += 1;
+        // For scanned commits, insertions are treated as AI lines (entire commit is AI-assisted)
+        let ai_lines = scanned.insertions;
+        stats.total_commits += 1;
+        stats.total_lines += ai_lines;
+        stats.ai_lines += ai_lines;
+    }
+    stats.scanned_commits = scanned_count;
 
     // Calculate percentages
     if stats.total_lines > 0 {
@@ -184,6 +212,20 @@ fn print_text_stats(stats: &Stats, developer: Option<&str>) {
         "Total Cost:     {}",
         format!("${:.2}", stats.total_cost_usd).yellow()
     );
+
+    // Detection sources
+    if stats.checkpoint_commits > 0 || stats.scanned_commits > 0 {
+        println!();
+        println!("{}", "Detection Sources:".bold());
+        println!(
+            "  Checkpoints:      {} commits (line-level fidelity)",
+            stats.checkpoint_commits.to_string().cyan()
+        );
+        println!(
+            "  Co-Authored-By:   {} commits (commit-level detection)",
+            stats.scanned_commits.to_string().cyan()
+        );
+    }
 
     // Per-developer breakdown
     if !stats.by_developer.is_empty() && developer.is_none() {

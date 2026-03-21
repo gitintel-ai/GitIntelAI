@@ -448,6 +448,58 @@ impl Database {
         Ok(attrs)
     }
 
+    /// Get a scanned attribution by commit SHA
+    pub fn get_scanned_attribution(&self, commit_sha: &str) -> Result<Option<ScannedAttribution>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT commit_sha, agent, confidence, insertions, deletions, files_changed, scanned_at FROM scanned_attributions WHERE commit_sha = ?1",
+        )?;
+
+        let attr = stmt
+            .query_row([commit_sha], |row| {
+                Ok(ScannedAttribution {
+                    commit_sha: row.get(0)?,
+                    agent: row.get(1)?,
+                    confidence: row.get(2)?,
+                    insertions: row.get(3)?,
+                    deletions: row.get(4)?,
+                    files_changed: row.get(5)?,
+                    scanned_at: row.get(6)?,
+                })
+            })
+            .optional()?;
+
+        Ok(attr)
+    }
+
+    /// Get scanned attributions that do NOT exist in the attributions table
+    pub fn get_scanned_only_attributions(&self) -> Result<Vec<ScannedAttribution>> {
+        let mut stmt = self.conn.prepare(
+            r#"
+            SELECT s.commit_sha, s.agent, s.confidence, s.insertions, s.deletions, s.files_changed, s.scanned_at
+            FROM scanned_attributions s
+            LEFT JOIN attributions a ON s.commit_sha = a.commit_sha
+            WHERE a.commit_sha IS NULL
+            ORDER BY s.scanned_at DESC
+            "#,
+        )?;
+
+        let attrs = stmt
+            .query_map([], |row| {
+                Ok(ScannedAttribution {
+                    commit_sha: row.get(0)?,
+                    agent: row.get(1)?,
+                    confidence: row.get(2)?,
+                    insertions: row.get(3)?,
+                    deletions: row.get(4)?,
+                    files_changed: row.get(5)?,
+                    scanned_at: row.get(6)?,
+                })
+            })?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(attrs)
+    }
+
     /// Get aggregated scan statistics grouped by agent
     pub fn get_scanned_stats(&self) -> Result<Vec<ScannedAgentStats>> {
         let mut stmt = self.conn.prepare(

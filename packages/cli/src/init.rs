@@ -4,6 +4,7 @@ use crate::config::{get_gitintel_home, Config};
 use crate::error::{GitIntelError, Result};
 use crate::hooks;
 use crate::store::Database;
+use crate::trailer_detection;
 use colored::Colorize;
 use std::path::Path;
 
@@ -30,7 +31,7 @@ pub async fn run(force: bool) -> Result<()> {
     println!("  {} Configuration saved", "✓".green());
 
     // Initialize database
-    let _db = Database::open()?;
+    let db = Database::open()?;
     println!("  {} Database initialized", "✓".green());
 
     // Install hooks
@@ -67,30 +68,75 @@ pub async fn run(force: bool) -> Result<()> {
         println!("  {} Created .gitintel/ in repository", "✓".green());
     }
 
-    // Set up environment variables hint
+    // Auto-scan commit history for AI-assisted commits via Co-Authored-By trailers
+    println!();
+    println!("{}", "Scanning commit history for AI-assisted commits...".cyan());
+    let repo_path_str = repo_path.to_string_lossy().to_string();
+    match trailer_detection::scan_repo(&repo_path_str, Some("90d"), Some(500), None) {
+        Ok(ai_commits) => {
+            let total_scanned = ai_commits.len();
+            let mut stored = 0;
+            for commit in &ai_commits {
+                if db.insert_scanned_attribution(
+                    &commit.sha,
+                    &commit.agent,
+                    commit.confidence,
+                    commit.insertions as i64,
+                    commit.deletions as i64,
+                    commit.files_changed as i64,
+                ).is_ok() {
+                    stored += 1;
+                }
+            }
+            // Count total commits scanned (need to walk the revwalk to count)
+            let scanned_total = count_recent_commits(&repo_path_str, 500);
+            let pct = if scanned_total > 0 {
+                (total_scanned as f64 / scanned_total as f64) * 100.0
+            } else {
+                0.0
+            };
+            println!(
+                "  {} Scanned {} commits, found {} AI-assisted ({:.1}%)",
+                "✓".green(),
+                scanned_total,
+                stored,
+                pct
+            );
+        }
+        Err(e) => {
+            println!(
+                "  {} Auto-scan skipped: {}",
+                "!".yellow(),
+                e
+            );
+        }
+    }
+
     println!();
     println!("{}", "GitIntel initialized successfully!".green().bold());
     println!();
-    println!("To enable Claude Code telemetry, add to your shell profile:");
-    println!();
-    println!("  {}", "export CLAUDE_CODE_ENABLE_TELEMETRY=1".yellow());
+    println!("  {}:", "Next steps".cyan().bold());
     println!(
-        "  {}",
-        format!(
-            "export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:{}",
-            config.otel.port
-        )
-        .yellow()
+        "    {}  Run {} to detect existing AI commits",
+        "1.".white().bold(),
+        "gitintel scan".green()
+    );
+    println!(
+        "    {}  Run {} to view AI adoption stats",
+        "2.".white().bold(),
+        "gitintel stats".green()
+    );
+    println!(
+        "    {}  Run {} to check line-level attribution",
+        "3.".white().bold(),
+        "gitintel blame <file>".green()
     );
     println!();
     println!(
-        "Then restart your terminal or run: {}",
-        "source ~/.bashrc".cyan()
-    );
-    println!();
-    println!(
-        "Auto-attribution for Claude Code is now active — no manual {} needed!",
-        "gitintel checkpoint".cyan()
+        "  {} For OTel telemetry, set {} and {} in your shell profile.",
+        "Optional:".dimmed(),
+        "CLAUDE_CODE_ENABLE_TELEMETRY=1".yellow(),
+        format!("OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:{}", config.otel.port).yellow()
     );
 
     Ok(())
@@ -181,4 +227,42 @@ fn configure_claude_code_hooks() -> std::result::Result<bool, Box<dyn std::error
 fn is_git_repo(path: &Path) -> bool {
     let git_dir = path.join(".git");
     git_dir.exists() && git_dir.is_dir()
+}
+
+/// Count recent commits in the repo (up to `limit`), limited to last 90 days.
+fn count_recent_commits(repo_path: &str, limit: usize) -> usize {
+    let repo = match git2::Repository::open(repo_path) {
+        Ok(r) => r,
+        Err(_) => return 0,
+    };
+
+    let mut revwalk = match repo.revwalk() {
+        Ok(r) => r,
+        Err(_) => return 0,
+    };
+
+    if revwalk.push_head().is_err() {
+        return 0;
+    }
+
+    let _ = revwalk.set_sorting(git2::Sort::TIME);
+
+    let since_epoch = (chrono::Utc::now() - chrono::Duration::days(90)).timestamp();
+
+    let mut count = 0;
+    for oid_result in revwalk {
+        if let Ok(oid) = oid_result {
+            if let Ok(commit) = repo.find_commit(oid) {
+                if commit.time().seconds() < since_epoch {
+                    break;
+                }
+            }
+        }
+        count += 1;
+        if count >= limit {
+            break;
+        }
+    }
+
+    count
 }

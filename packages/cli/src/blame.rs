@@ -46,7 +46,6 @@ pub async fn run(
     human_only: bool,
 ) -> Result<()> {
     let config = Config::load()?;
-    let _db = Database::open()?;
 
     // Run git blame to get base output
     let mut cmd = Command::new(&config.git_path);
@@ -71,6 +70,29 @@ pub async fn run(
     // Load AI attribution data from git notes
     let attribution_map = load_attribution_map(&config, file)?;
 
+    // Build a set of commit SHAs that have checkpoint-based attribution for this file
+    let checkpoint_shas: std::collections::HashSet<String> = attribution_map
+        .keys()
+        .map(|(sha, _)| sha.clone())
+        .collect();
+
+    // Collect unique commit SHAs from blame output to check against scanned_attributions
+    let blame_shas: std::collections::HashSet<String> = blame_lines
+        .iter()
+        .map(|l| l.commit_sha.clone())
+        .collect();
+
+    // Look up which commits are in scanned_attributions (trailer-detected AI commits)
+    let mut scanned_shas: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let db = Database::open()?;
+    for sha in &blame_shas {
+        if !checkpoint_shas.contains(sha) {
+            if let Ok(Some(_)) = db.get_scanned_attribution(sha) {
+                scanned_shas.insert(sha.clone());
+            }
+        }
+    }
+
     // Display results
     println!(
         "{} {} ({} lines)",
@@ -81,10 +103,18 @@ pub async fn run(
     println!("{}", "─".repeat(80));
 
     for mut line in blame_lines {
-        // Apply attribution from our data
+        // Apply attribution from our checkpoint data
         if let Some(attr) = attribution_map.get(&(line.commit_sha.clone(), line.line_number)) {
             line.attribution = *attr;
+        } else if scanned_shas.contains(&line.commit_sha) {
+            // Commit was detected as AI-assisted via Co-Authored-By trailer
+            // but no line-level checkpoint data exists — mark as AI*
+            line.attribution = LineAttribution::AI;
         }
+
+        // Determine if this line's attribution came from scan (trailer) detection
+        let is_scanned = scanned_shas.contains(&line.commit_sha)
+            && !attribution_map.contains_key(&(line.commit_sha.clone(), line.line_number));
 
         // Filter based on flags
         if ai_only && line.attribution != LineAttribution::AI {
@@ -94,8 +124,9 @@ pub async fn run(
             continue;
         }
 
-        // Color based on attribution
+        // Color based on attribution; use [AI*] for trailer-detected lines
         let attr_color = match line.attribution {
+            LineAttribution::AI if is_scanned => format!("[{}]", "AI*".blue()),
             LineAttribution::AI => format!("[{}]", "AI".blue()),
             LineAttribution::Human => format!("[{}]", "HU".green()),
             LineAttribution::Mixed => format!("[{}]", "MX".yellow()),

@@ -49,3 +49,6 @@ coverage/
 *.db
 *.db-shm
 *.db-wal
+
+# Internal docs (pricing, competitive intel, revenue targets)
+docs/internal/

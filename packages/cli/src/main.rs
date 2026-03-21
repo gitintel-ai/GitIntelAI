@@ -17,6 +17,7 @@ mod otel;
 mod proxy;
 mod scan;
 mod stats;
+mod status;
 mod store;
 mod sync;
 mod trailer_detection;
@@ -53,16 +54,16 @@ enum Commands {
     /// Record a checkpoint from an AI coding agent
     Checkpoint {
         /// Agent name (e.g., "Claude Code", "Cursor", "Copilot")
-        #[arg(long)]
+        #[arg(long, default_value = "unknown")]
         agent: String,
 
         /// Model name (e.g., "claude-opus-4-5")
-        #[arg(long)]
+        #[arg(long, default_value = "unknown")]
         model: String,
 
-        /// Session ID for correlation
+        /// Session ID for correlation (auto-generates UUID if omitted)
         #[arg(long)]
-        session_id: String,
+        session_id: Option<String>,
 
         /// File path being edited
         #[arg(long)]
@@ -203,6 +204,9 @@ enum Commands {
         #[arg(long, default_value = "text")]
         format: String,
     },
+
+    /// Show GitIntel health status for current repo
+    Status,
 
     /// Check for and install CLI updates
     Update {
@@ -357,10 +361,12 @@ async fn main() -> ExitCode {
             cost_usd,
             transcript_ref,
         }) => {
+            let resolved_session_id =
+                session_id.unwrap_or_else(|| uuid::Uuid::new_v4().to_string());
             checkpoint::run(
                 &agent,
                 &model,
-                &session_id,
+                &resolved_session_id,
                 &file,
                 &lines,
                 tokens_in,
@@ -438,6 +444,8 @@ async fn main() -> ExitCode {
 
         Some(Commands::Config { json, set }) => config::run(json, set.as_deref()).await,
 
+        Some(Commands::Status) => status::run().await,
+
         Some(Commands::Scan {
             limit,
             branch,
@@ -448,11 +456,45 @@ async fn main() -> ExitCode {
         Some(Commands::Update { check }) => update::run(check).await,
 
         None => {
-            println!("{}", "GitIntel CLI - Git-native AI adoption tracking".green());
+            println!(
+                "{} {} {}",
+                "GitIntel".green().bold(),
+                "v0.1.0".dimmed(),
+                "— the missing git blame for AI code".white()
+            );
             println!();
-            println!("Usage: gitintel <COMMAND>");
+            println!("  {}:", "Quick start".cyan().bold());
+            println!(
+                "    {}           {}",
+                "gitintel scan".green(),
+                "Detect AI commits (zero setup)"
+            );
+            println!(
+                "    {}           {}",
+                "gitintel init".green(),
+                "Set up live tracking"
+            );
+            println!(
+                "    {}          {}",
+                "gitintel stats".green(),
+                "View AI adoption stats"
+            );
+            println!(
+                "    {}   {}",
+                "gitintel blame <file>".green(),
+                "See AI vs human per line"
+            );
             println!();
-            println!("Run 'gitintel --help' for more information.");
+            println!(
+                "  {}  {}",
+                "All commands:".dimmed(),
+                "gitintel --help"
+            );
+            println!(
+                "  {}          {}",
+                "Docs:".dimmed(),
+                "https://github.com/gitintel-ai/GitIntelAI"
+            );
             Ok(())
         }
     };

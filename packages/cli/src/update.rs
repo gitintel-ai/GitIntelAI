@@ -43,7 +43,11 @@ pub async fn run(check_only: bool) -> Result<()> {
     let current = CURRENT_VERSION.trim_start_matches('v');
 
     if latest == current {
-        println!("{} Already up to date ({})", "✓".green(), CURRENT_VERSION.cyan());
+        println!(
+            "{} Already up to date ({})",
+            "✓".green(),
+            CURRENT_VERSION.cyan()
+        );
         return Ok(());
     }
 
@@ -83,8 +87,8 @@ pub async fn run(check_only: bool) -> Result<()> {
         .map_err(|e| crate::error::GitIntelError::Other(e.to_string()))?;
 
     // Get path of current binary
-    let current_exe = std::env::current_exe()
-        .map_err(|e| crate::error::GitIntelError::Other(e.to_string()))?;
+    let current_exe =
+        std::env::current_exe().map_err(|e| crate::error::GitIntelError::Other(e.to_string()))?;
 
     // Write to temp file then atomically replace
     let tmp_path = current_exe.with_extension("tmp");

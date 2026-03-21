@@ -176,8 +176,8 @@ fn get_branch_cost(db: &Database, config: &Config, branch: &str) -> Result<CostS
         summary.total_lines = summary.ai_lines;
     }
     if summary.total_lines > 0 {
-        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
-            .clamp(0.0, 100.0);
+        summary.ai_percentage =
+            ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0).clamp(0.0, 100.0);
     }
 
     Ok(summary)
@@ -222,8 +222,8 @@ fn get_developer_cost(db: &Database, developer: &str, since: Option<&str>) -> Re
         summary.total_lines = summary.ai_lines;
     }
     if summary.total_lines > 0 {
-        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
-            .clamp(0.0, 100.0);
+        summary.ai_percentage =
+            ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0).clamp(0.0, 100.0);
     }
 
     Ok(summary)
@@ -270,8 +270,8 @@ fn get_period_cost(db: &Database, period: &str) -> Result<CostSummary> {
         summary.total_lines = summary.ai_lines;
     }
     if summary.total_lines > 0 {
-        summary.ai_percentage = ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0)
-            .clamp(0.0, 100.0);
+        summary.ai_percentage =
+            ((summary.ai_lines as f64 / summary.total_lines as f64) * 100.0).clamp(0.0, 100.0);
     }
 
     Ok(summary)
@@ -314,17 +314,23 @@ fn parse_period(period: &str) -> Result<Duration> {
     let period = period.trim().to_lowercase();
 
     if let Some(days) = period.strip_suffix('d') {
-        let n: i64 = days.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = days
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::days(n));
     }
 
     if let Some(weeks) = period.strip_suffix('w') {
-        let n: i64 = weeks.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = weeks
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::weeks(n));
     }
 
     if let Some(months) = period.strip_suffix('m') {
-        let n: i64 = months.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = months
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::days(n * 30));
     }
 
@@ -358,9 +364,7 @@ fn print_text_cost(summary: &CostSummary) {
         for agent in &summary.by_agent {
             println!(
                 "├─ {}: ${:.2} ({:.0}%)",
-                agent.agent,
-                agent.cost_usd,
-                agent.percentage
+                agent.agent, agent.cost_usd, agent.percentage
             );
         }
     }

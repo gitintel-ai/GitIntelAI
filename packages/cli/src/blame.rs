@@ -39,12 +39,7 @@ pub struct BlameLine {
 }
 
 /// Run the blame command
-pub async fn run(
-    file: &str,
-    commit: Option<&str>,
-    ai_only: bool,
-    human_only: bool,
-) -> Result<()> {
+pub async fn run(file: &str, commit: Option<&str>, ai_only: bool, human_only: bool) -> Result<()> {
     let config = Config::load()?;
 
     // Run git blame to get base output
@@ -61,7 +56,10 @@ pub async fn run(
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(GitIntelError::Other(format!("git blame failed: {}", stderr)));
+        return Err(GitIntelError::Other(format!(
+            "git blame failed: {}",
+            stderr
+        )));
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -71,16 +69,12 @@ pub async fn run(
     let attribution_map = load_attribution_map(&config, file)?;
 
     // Build a set of commit SHAs that have checkpoint-based attribution for this file
-    let checkpoint_shas: std::collections::HashSet<String> = attribution_map
-        .keys()
-        .map(|(sha, _)| sha.clone())
-        .collect();
+    let checkpoint_shas: std::collections::HashSet<String> =
+        attribution_map.keys().map(|(sha, _)| sha.clone()).collect();
 
     // Collect unique commit SHAs from blame output to check against scanned_attributions
-    let blame_shas: std::collections::HashSet<String> = blame_lines
-        .iter()
-        .map(|l| l.commit_sha.clone())
-        .collect();
+    let blame_shas: std::collections::HashSet<String> =
+        blame_lines.iter().map(|l| l.commit_sha.clone()).collect();
 
     // Look up which commits are in scanned_attributions (trailer-detected AI commits)
     let mut scanned_shas: std::collections::HashSet<String> = std::collections::HashSet::new();
@@ -351,8 +345,14 @@ agent_sessions:
         let result = parse_authorship_log(yaml, "src/main.rs").unwrap();
         // AI lines: 1..=10 (10) + 20..=25 (6) = 16
         // Human lines: 11..=19 (9)
-        let ai_count = result.iter().filter(|(_, a)| *a == LineAttribution::AI).count();
-        let human_count = result.iter().filter(|(_, a)| *a == LineAttribution::Human).count();
+        let ai_count = result
+            .iter()
+            .filter(|(_, a)| *a == LineAttribution::AI)
+            .count();
+        let human_count = result
+            .iter()
+            .filter(|(_, a)| *a == LineAttribution::Human)
+            .count();
         assert_eq!(ai_count, 16);
         assert_eq!(human_count, 9);
     }
@@ -374,7 +374,10 @@ agent_sessions:
 "#;
         let result = parse_authorship_log(yaml, "src/lib.rs").unwrap();
         // Lines 8, 9, 10 should be Mixed (in both ai_lines and human_lines)
-        let mixed: Vec<_> = result.iter().filter(|(_, a)| *a == LineAttribution::Mixed).collect();
+        let mixed: Vec<_> = result
+            .iter()
+            .filter(|(_, a)| *a == LineAttribution::Mixed)
+            .collect();
         assert_eq!(mixed.len(), 3); // lines 8, 9, 10
     }
 

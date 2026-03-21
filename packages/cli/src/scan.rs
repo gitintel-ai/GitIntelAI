@@ -73,13 +73,15 @@ pub async fn run(
         total_insertions += commit.insertions;
         total_deletions += commit.deletions;
 
-        let entry = agent_map.entry(commit.agent.clone()).or_insert(AgentBreakdown {
-            agent: commit.agent.clone(),
-            commits: 0,
-            insertions: 0,
-            deletions: 0,
-            files_changed: 0,
-        });
+        let entry = agent_map
+            .entry(commit.agent.clone())
+            .or_insert(AgentBreakdown {
+                agent: commit.agent.clone(),
+                commits: 0,
+                insertions: 0,
+                deletions: 0,
+                files_changed: 0,
+            });
 
         entry.commits += 1;
         entry.insertions += commit.insertions;
@@ -129,22 +131,28 @@ fn count_commits(
     let repo = git2::Repository::open(repo_path)
         .map_err(|e| crate::error::GitIntelError::Other(format!("Failed to open repo: {e}")))?;
 
-    let mut revwalk = repo.revwalk()
+    let mut revwalk = repo
+        .revwalk()
         .map_err(|e| crate::error::GitIntelError::Other(format!("Revwalk error: {e}")))?;
 
     if let Some(branch_name) = branch {
-        let reference = repo.resolve_reference_from_short_name(branch_name)
+        let reference = repo
+            .resolve_reference_from_short_name(branch_name)
             .map_err(|e| crate::error::GitIntelError::Other(format!("Branch not found: {e}")))?;
-        let oid = reference.target()
+        let oid = reference
+            .target()
             .ok_or_else(|| crate::error::GitIntelError::Other("No target".to_string()))?;
-        revwalk.push(oid)
+        revwalk
+            .push(oid)
             .map_err(|e| crate::error::GitIntelError::Other(format!("Push error: {e}")))?;
     } else {
-        revwalk.push_head()
+        revwalk
+            .push_head()
             .map_err(|e| crate::error::GitIntelError::Other(format!("Push HEAD error: {e}")))?;
     }
 
-    revwalk.set_sorting(git2::Sort::TIME)
+    revwalk
+        .set_sorting(git2::Sort::TIME)
         .map_err(|e| crate::error::GitIntelError::Other(format!("Sort error: {e}")))?;
 
     let since_epoch = if let Some(s) = since {
@@ -254,9 +262,7 @@ fn print_text_summary(summary: &ScanSummary) {
     println!();
     println!(
         "{}",
-        format!(
-            "Results stored in local database. Run 'gitintel stats' for deeper analysis."
-        )
-        .dimmed()
+        format!("Results stored in local database. Run 'gitintel stats' for deeper analysis.")
+            .dimmed()
     );
 }

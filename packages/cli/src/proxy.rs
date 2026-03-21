@@ -95,11 +95,7 @@ async fn run_git_with_refs_push(config: &Config, args: &[String]) -> Result<()> 
     let remote = get_remote_from_args(args).unwrap_or("origin");
 
     let _ = Command::new(&config.git_path)
-        .args([
-            "push",
-            remote,
-            "refs/ai/authorship/*:refs/ai/authorship/*",
-        ])
+        .args(["push", remote, "refs/ai/authorship/*:refs/ai/authorship/*"])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())
@@ -126,11 +122,7 @@ async fn run_git_with_refs_fetch(config: &Config, args: &[String]) -> Result<()>
     let remote = get_remote_from_args(args).unwrap_or("origin");
 
     let _ = Command::new(&config.git_path)
-        .args([
-            "fetch",
-            remote,
-            "refs/ai/authorship/*:refs/ai/authorship/*",
-        ])
+        .args(["fetch", remote, "refs/ai/authorship/*:refs/ai/authorship/*"])
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::null())

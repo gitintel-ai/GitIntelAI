@@ -39,7 +39,15 @@ async fn handle_rebase(config: &Config) -> Result<()> {
                 if note_output.status.success() {
                     let note_content = String::from_utf8_lossy(&note_output.stdout);
                     let _ = Command::new(&config.git_path)
-                        .args(["notes", "--ref=refs/ai/authorship", "add", "-f", "-m", &note_content, new_sha])
+                        .args([
+                            "notes",
+                            "--ref=refs/ai/authorship",
+                            "add",
+                            "-f",
+                            "-m",
+                            &note_content,
+                            new_sha,
+                        ])
                         .status();
                 }
             }
@@ -71,7 +79,15 @@ async fn handle_amend(config: &Config) -> Result<()> {
                 if note_output.status.success() {
                     let note_content = String::from_utf8_lossy(&note_output.stdout);
                     let _ = Command::new(&config.git_path)
-                        .args(["notes", "--ref=refs/ai/authorship", "add", "-f", "-m", &note_content, new_sha])
+                        .args([
+                            "notes",
+                            "--ref=refs/ai/authorship",
+                            "add",
+                            "-f",
+                            "-m",
+                            &note_content,
+                            new_sha,
+                        ])
                         .status();
                 }
             }
@@ -123,7 +139,15 @@ async fn handle_merge(config: &Config) -> Result<()> {
 
     // Write combined note to merge commit
     let _ = Command::new(&config.git_path)
-        .args(["notes", "--ref=refs/ai/authorship", "add", "-f", "-m", &combined_notes, &merge_sha])
+        .args([
+            "notes",
+            "--ref=refs/ai/authorship",
+            "add",
+            "-f",
+            "-m",
+            &combined_notes,
+            &merge_sha,
+        ])
         .status();
 
     Ok(())

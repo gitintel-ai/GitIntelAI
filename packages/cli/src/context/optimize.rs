@@ -58,10 +58,7 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
     println!("{}", "CLAUDE.md Optimization Report".bold());
     println!("{}", "─".repeat(50));
     println!("Current:   {} tokens", original_tokens.to_string().cyan());
-    println!(
-        "Optimized: {} tokens",
-        optimized_tokens.to_string().green()
-    );
+    println!("Optimized: {} tokens", optimized_tokens.to_string().green());
     println!(
         "Savings:   {} tokens ({:.1}% reduction)",
         (original_tokens - optimized_tokens).to_string().yellow(),
@@ -70,7 +67,10 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
     println!();
 
     // Show pruned sections
-    let pruned: Vec<_> = sections.iter().filter(|s| s.action == SectionAction::Prune).collect();
+    let pruned: Vec<_> = sections
+        .iter()
+        .filter(|s| s.action == SectionAction::Prune)
+        .collect();
     if !pruned.is_empty() {
         println!("{}", "Sections to prune (score < 0.05):".red());
         for s in pruned {
@@ -86,7 +86,10 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
     }
 
     // Show compressed sections
-    let compressed: Vec<_> = sections.iter().filter(|s| s.action == SectionAction::Compress).collect();
+    let compressed: Vec<_> = sections
+        .iter()
+        .filter(|s| s.action == SectionAction::Compress)
+        .collect();
     if !compressed.is_empty() {
         println!("{}", "Sections to compress (score < 0.20):".yellow());
         for s in compressed {
@@ -103,7 +106,10 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
     }
 
     // Show kept sections
-    let kept: Vec<_> = sections.iter().filter(|s| s.action == SectionAction::Keep).collect();
+    let kept: Vec<_> = sections
+        .iter()
+        .filter(|s| s.action == SectionAction::Keep)
+        .collect();
     if !kept.is_empty() {
         println!("{}", "Sections to keep:".green());
         for s in kept {
@@ -253,7 +259,9 @@ fn apply_optimizations(content: &str, sections: &[Section]) -> Result<String> {
                     SectionAction::Compress => {
                         // Write compressed version
                         result.push_str(line);
-                        result.push_str("\n[Section compressed - see full version in git history]\n\n");
+                        result.push_str(
+                            "\n[Section compressed - see full version in git history]\n\n",
+                        );
                         skip_lines = true;
                     }
                     SectionAction::Prune => {

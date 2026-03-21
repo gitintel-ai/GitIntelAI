@@ -11,10 +11,7 @@ pub async fn run(_force: bool, dry_run: bool) -> Result<()> {
     let db = Database::open()?;
 
     if !config.cloud_sync.enabled {
-        println!(
-            "{} Cloud sync is disabled. Enable it with:",
-            "Info:".cyan()
-        );
+        println!("{} Cloud sync is disabled. Enable it with:", "Info:".cyan());
         println!("  gitintel config --set cloud_sync.enabled=true");
         println!("  gitintel config --set cloud_sync.api_key=<your-api-key>");
         return Ok(());
@@ -33,7 +30,8 @@ pub async fn run(_force: bool, dry_run: bool) -> Result<()> {
     }
 
     // Get unsynced data
-    let attributions = db.get_attributions_since(chrono::Utc::now() - chrono::Duration::days(30))?;
+    let attributions =
+        db.get_attributions_since(chrono::Utc::now() - chrono::Duration::days(30))?;
 
     println!("  Found {} attributions to sync", attributions.len());
 
@@ -61,7 +59,10 @@ pub async fn run(_force: bool, dry_run: bool) -> Result<()> {
     for attr in &attributions {
         let response = client
             .post(format!("{}/sync/attribution", config.cloud_sync.endpoint))
-            .header("Authorization", format!("Bearer {}", config.cloud_sync.api_key))
+            .header(
+                "Authorization",
+                format!("Bearer {}", config.cloud_sync.api_key),
+            )
             .json(&serde_json::json!({
                 "commit_sha": attr.commit_sha,
                 "repo_path": attr.repo_path,
@@ -89,11 +90,7 @@ pub async fn run(_force: bool, dry_run: bool) -> Result<()> {
         }
     }
 
-    println!(
-        "{} Synced {} attributions",
-        "✓".green(),
-        attributions.len()
-    );
+    println!("{} Synced {} attributions", "✓".green(), attributions.len());
 
     Ok(())
 }

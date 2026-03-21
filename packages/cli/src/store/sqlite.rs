@@ -259,9 +259,9 @@ impl Database {
 
     /// Get all pending checkpoints (since last commit)
     pub fn get_pending_checkpoints(&self) -> Result<Vec<Checkpoint>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT * FROM checkpoints ORDER BY timestamp ASC",
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT * FROM checkpoints ORDER BY timestamp ASC")?;
 
         let checkpoints = stmt
             .query_map([], |row| {
@@ -325,9 +325,9 @@ impl Database {
 
     /// Get attribution for a commit
     pub fn get_attribution(&self, commit_sha: &str) -> Result<Option<Attribution>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT * FROM attributions WHERE commit_sha = ?1",
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT * FROM attributions WHERE commit_sha = ?1")?;
 
         let attr = stmt
             .query_row([commit_sha], |row| {
@@ -558,9 +558,9 @@ impl Database {
 
     /// Get cost sessions for a commit
     pub fn get_cost_sessions_for_commit(&self, commit_sha: &str) -> Result<Vec<CostSession>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT * FROM cost_sessions WHERE commit_sha = ?1",
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT * FROM cost_sessions WHERE commit_sha = ?1")?;
 
         let sessions = stmt
             .query_map([commit_sha], |row| {
@@ -717,7 +717,9 @@ impl Database {
 
     /// Delete a memory entry
     pub fn delete_memory(&self, key: &str) -> Result<bool> {
-        let deleted = self.conn.execute("DELETE FROM memory WHERE key = ?1", [key])?;
+        let deleted = self
+            .conn
+            .execute("DELETE FROM memory WHERE key = ?1", [key])?;
         Ok(deleted > 0)
     }
 
@@ -725,13 +727,11 @@ impl Database {
 
     /// Get the last sync timestamp
     pub fn get_last_sync_time(&self) -> Result<Option<DateTime<Utc>>> {
-        let mut stmt = self.conn.prepare(
-            "SELECT value FROM sync_metadata WHERE key = 'last_sync_time'",
-        )?;
+        let mut stmt = self
+            .conn
+            .prepare("SELECT value FROM sync_metadata WHERE key = 'last_sync_time'")?;
 
-        let result: Option<String> = stmt
-            .query_row([], |row| row.get(0))
-            .optional()?;
+        let result: Option<String> = stmt.query_row([], |row| row.get(0)).optional()?;
 
         match result {
             Some(s) => {

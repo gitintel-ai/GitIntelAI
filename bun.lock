@@ -9,6 +9,13 @@
         "typescript": "^5.6.0",
       },
     },
+    "packages/cli-npm": {
+      "name": "@gitintel-cli/gitintel",
+      "version": "0.1.0",
+      "bin": {
+        "gitintel": "./bin/gitintel.js",
+      },
+    },
     "packages/core": {
       "name": "@gitintel/core",
       "version": "0.1.0",
@@ -172,6 +179,8 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.7", "", { "dependencies": { "@floating-ui/dom": "^1.7.5" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-0tLRojf/1Go2JgEVm+3Frg9A3IW8bJgKgdO0BN5RkF//ufuz2joZM63Npau2ff3J6lUVYgDSNzNkR+aH3IVfjg=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.10", "", {}, "sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ=="],
+
+    "@gitintel-cli/gitintel": ["@gitintel-cli/gitintel@workspace:packages/cli-npm"],
 
     "@gitintel/core": ["@gitintel/core@workspace:packages/core"],
 

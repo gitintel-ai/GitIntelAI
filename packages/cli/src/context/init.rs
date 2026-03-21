@@ -130,7 +130,11 @@ fn generate_claude_md(info: &scanner::ProjectInfo) -> Result<String> {
         content.push_str("# Build\ncargo build\n\n");
         content.push_str("# Test\ncargo test\n\n");
         content.push_str("# Lint\ncargo clippy\n");
-    } else if info.languages.iter().any(|l| l.contains("JavaScript") || l.contains("TypeScript")) {
+    } else if info
+        .languages
+        .iter()
+        .any(|l| l.contains("JavaScript") || l.contains("TypeScript"))
+    {
         content.push_str("# Install\nbun install\n\n");
         content.push_str("# Dev\nbun run dev\n\n");
         content.push_str("# Test\nbun test\n\n");

@@ -26,12 +26,10 @@ pub async fn handle_post_tool_use() -> Result<()> {
 
     let tool_name = payload["tool_name"].as_str().unwrap_or("");
     let file_path = match tool_name {
-        "Write" | "Edit" | "MultiEdit" => {
-            payload["tool_input"]["file_path"]
-                .as_str()
-                .unwrap_or("")
-                .to_string()
-        }
+        "Write" | "Edit" | "MultiEdit" => payload["tool_input"]["file_path"]
+            .as_str()
+            .unwrap_or("")
+            .to_string(),
         _ => return Ok(()),
     };
 

@@ -436,9 +436,10 @@ async fn main() -> ExitCode {
             HookCommands::Install { force } => hooks::install(force).await,
             HookCommands::Uninstall => hooks::uninstall().await,
             HookCommands::Status => hooks::status().await,
-            HookCommands::Run { hook_name, hook_args } => {
-                hooks::run_hook(&hook_name, &hook_args).await
-            }
+            HookCommands::Run {
+                hook_name,
+                hook_args,
+            } => hooks::run_hook(&hook_name, &hook_args).await,
         },
 
         Some(Commands::Config { json, set }) => config::run(json, set.as_deref()).await,
@@ -484,11 +485,7 @@ async fn main() -> ExitCode {
                 "See AI vs human per line"
             );
             println!();
-            println!(
-                "  {}  {}",
-                "All commands:".dimmed(),
-                "gitintel --help"
-            );
+            println!("  {}  {}", "All commands:".dimmed(), "gitintel --help");
             println!(
                 "  {}          {}",
                 "Docs:".dimmed(),

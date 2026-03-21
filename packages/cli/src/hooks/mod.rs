@@ -30,7 +30,11 @@ pub async fn install(force: bool) -> Result<()> {
         let hook_path = hooks_path.join(name);
 
         if hook_path.exists() && !force {
-            println!("  {} Hook {} already exists (use --force to overwrite)", "→".yellow(), name);
+            println!(
+                "  {} Hook {} already exists (use --force to overwrite)",
+                "→".yellow(),
+                name
+            );
             continue;
         }
 
@@ -50,7 +54,12 @@ pub async fn install(force: bool) -> Result<()> {
     // Update git config to use our hooks path
     let config = Config::load()?;
     let output = std::process::Command::new(&config.git_path)
-        .args(["config", "--global", "core.hooksPath", hooks_path.to_str().unwrap()])
+        .args([
+            "config",
+            "--global",
+            "core.hooksPath",
+            hooks_path.to_str().unwrap(),
+        ])
         .output()?;
 
     if output.status.success() {
@@ -96,11 +105,22 @@ pub async fn status() -> Result<()> {
     } else if current_path.is_empty() {
         println!("{} Global hooks path: not set", "✗".red());
     } else {
-        println!("{} Global hooks path: {} (expected: {})", "!".yellow(), current_path, expected_path);
+        println!(
+            "{} Global hooks path: {} (expected: {})",
+            "!".yellow(),
+            current_path,
+            expected_path
+        );
     }
 
     // Check individual hooks
-    let hook_names = ["pre-commit", "post-commit", "prepare-commit-msg", "post-rewrite", "post-merge"];
+    let hook_names = [
+        "pre-commit",
+        "post-commit",
+        "prepare-commit-msg",
+        "post-rewrite",
+        "post-merge",
+    ];
 
     println!();
     println!("Installed hooks:");

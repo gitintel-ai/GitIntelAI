@@ -77,23 +77,31 @@ pub fn scan_repo(
     let repo = git2::Repository::open(repo_path)
         .map_err(|e| GitIntelError::Other(format!("Failed to open repository: {e}")))?;
 
-    let mut revwalk = repo.revwalk()
+    let mut revwalk = repo
+        .revwalk()
         .map_err(|e| GitIntelError::Other(format!("Failed to create revwalk: {e}")))?;
 
     // Set starting point
     if let Some(branch_name) = branch {
-        let reference = repo.resolve_reference_from_short_name(branch_name)
-            .map_err(|e| GitIntelError::Other(format!("Branch '{}' not found: {e}", branch_name)))?;
-        let oid = reference.target()
-            .ok_or_else(|| GitIntelError::Other(format!("Branch '{}' has no target", branch_name)))?;
-        revwalk.push(oid)
+        let reference = repo
+            .resolve_reference_from_short_name(branch_name)
+            .map_err(|e| {
+                GitIntelError::Other(format!("Branch '{}' not found: {e}", branch_name))
+            })?;
+        let oid = reference.target().ok_or_else(|| {
+            GitIntelError::Other(format!("Branch '{}' has no target", branch_name))
+        })?;
+        revwalk
+            .push(oid)
             .map_err(|e| GitIntelError::Other(format!("Failed to push to revwalk: {e}")))?;
     } else {
-        revwalk.push_head()
+        revwalk
+            .push_head()
             .map_err(|e| GitIntelError::Other(format!("Failed to push HEAD: {e}")))?;
     }
 
-    revwalk.set_sorting(git2::Sort::TIME)
+    revwalk
+        .set_sorting(git2::Sort::TIME)
         .map_err(|e| GitIntelError::Other(format!("Failed to set sorting: {e}")))?;
 
     // Parse the --since date if provided
@@ -108,10 +116,10 @@ pub fn scan_repo(
 
     let mut count = 0;
     for oid_result in revwalk {
-        let oid = oid_result
-            .map_err(|e| GitIntelError::Other(format!("Revwalk error: {e}")))?;
+        let oid = oid_result.map_err(|e| GitIntelError::Other(format!("Revwalk error: {e}")))?;
 
-        let commit = repo.find_commit(oid)
+        let commit = repo
+            .find_commit(oid)
             .map_err(|e| GitIntelError::Other(format!("Failed to find commit: {e}")))?;
 
         // Check time filter
@@ -167,8 +175,13 @@ pub fn scan_repo(
 fn get_shortstat(repo_path: &str, sha: &str) -> (u32, u32, u32) {
     let output = Command::new("git")
         .args([
-            "-C", repo_path,
-            "log", "--format=", "--shortstat", "-1", sha,
+            "-C",
+            repo_path,
+            "log",
+            "--format=",
+            "--shortstat",
+            "-1",
+            sha,
         ])
         .output();
 
@@ -195,19 +208,28 @@ fn parse_shortstat(text: &str) -> (u32, u32, u32) {
     // Match files changed
     let files_re = Regex::new(r"(\d+)\s+files?\s+changed").expect("valid regex");
     if let Some(caps) = files_re.captures(text) {
-        files = caps.get(1).and_then(|m| m.as_str().parse().ok()).unwrap_or(0);
+        files = caps
+            .get(1)
+            .and_then(|m| m.as_str().parse().ok())
+            .unwrap_or(0);
     }
 
     // Match insertions
     let ins_re = Regex::new(r"(\d+)\s+insertions?\(\+\)").expect("valid regex");
     if let Some(caps) = ins_re.captures(text) {
-        insertions = caps.get(1).and_then(|m| m.as_str().parse().ok()).unwrap_or(0);
+        insertions = caps
+            .get(1)
+            .and_then(|m| m.as_str().parse().ok())
+            .unwrap_or(0);
     }
 
     // Match deletions
     let del_re = Regex::new(r"(\d+)\s+deletions?\(-\)").expect("valid regex");
     if let Some(caps) = del_re.captures(text) {
-        deletions = caps.get(1).and_then(|m| m.as_str().parse().ok()).unwrap_or(0);
+        deletions = caps
+            .get(1)
+            .and_then(|m| m.as_str().parse().ok())
+            .unwrap_or(0);
     }
 
     (insertions, deletions, files)
@@ -219,17 +241,23 @@ fn parse_since_to_epoch(since: &str) -> Result<i64> {
 
     // Try relative period
     if let Some(days) = since.strip_suffix('d') {
-        let n: i64 = days.parse().map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
+        let n: i64 = days
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
         return Ok((chrono::Utc::now() - chrono::Duration::days(n)).timestamp());
     }
 
     if let Some(weeks) = since.strip_suffix('w') {
-        let n: i64 = weeks.parse().map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
+        let n: i64 = weeks
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
         return Ok((chrono::Utc::now() - chrono::Duration::weeks(n)).timestamp());
     }
 
     if let Some(months) = since.strip_suffix('m') {
-        let n: i64 = months.parse().map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
+        let n: i64 = months
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(since.clone()))?;
         return Ok((chrono::Utc::now() - chrono::Duration::days(n * 30)).timestamp());
     }
 

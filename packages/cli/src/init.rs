@@ -48,11 +48,7 @@ pub async fn run(force: bool) -> Result<()> {
             }
         }
         Err(e) => {
-            println!(
-                "  {} Claude Code hook setup skipped: {}",
-                "!".yellow(),
-                e
-            );
+            println!("  {} Claude Code hook setup skipped: {}", "!".yellow(), e);
         }
     }
 
@@ -63,28 +59,37 @@ pub async fn run(force: bool) -> Result<()> {
 
         // Create .gitignore for sensitive files
         let gitignore = repo_gitintel.join(".gitignore");
-        std::fs::write(&gitignore, "# Ignore local GitIntel data\n*.db\nconfig.local.json\n")?;
+        std::fs::write(
+            &gitignore,
+            "# Ignore local GitIntel data\n*.db\nconfig.local.json\n",
+        )?;
 
         println!("  {} Created .gitintel/ in repository", "✓".green());
     }
 
     // Auto-scan commit history for AI-assisted commits via Co-Authored-By trailers
     println!();
-    println!("{}", "Scanning commit history for AI-assisted commits...".cyan());
+    println!(
+        "{}",
+        "Scanning commit history for AI-assisted commits...".cyan()
+    );
     let repo_path_str = repo_path.to_string_lossy().to_string();
     match trailer_detection::scan_repo(&repo_path_str, Some("90d"), Some(500), None) {
         Ok(ai_commits) => {
             let total_scanned = ai_commits.len();
             let mut stored = 0;
             for commit in &ai_commits {
-                if db.insert_scanned_attribution(
-                    &commit.sha,
-                    &commit.agent,
-                    commit.confidence,
-                    commit.insertions as i64,
-                    commit.deletions as i64,
-                    commit.files_changed as i64,
-                ).is_ok() {
+                if db
+                    .insert_scanned_attribution(
+                        &commit.sha,
+                        &commit.agent,
+                        commit.confidence,
+                        commit.insertions as i64,
+                        commit.deletions as i64,
+                        commit.files_changed as i64,
+                    )
+                    .is_ok()
+                {
                     stored += 1;
                 }
             }
@@ -111,11 +116,7 @@ pub async fn run(force: bool) -> Result<()> {
                     "→".yellow(),
                 );
             } else {
-                println!(
-                    "  {} Auto-scan skipped: {}",
-                    "!".yellow(),
-                    msg
-                );
+                println!("  {} Auto-scan skipped: {}", "!".yellow(), msg);
             }
         }
     }
@@ -144,7 +145,11 @@ pub async fn run(force: bool) -> Result<()> {
         "  {} For OTel telemetry, set {} and {} in your shell profile.",
         "Optional:".dimmed(),
         "CLAUDE_CODE_ENABLE_TELEMETRY=1".yellow(),
-        format!("OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:{}", config.otel.port).yellow()
+        format!(
+            "OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:{}",
+            config.otel.port
+        )
+        .yellow()
     );
 
     Ok(())
@@ -177,7 +182,10 @@ fn configure_claude_code_hooks() -> std::result::Result<bool, Box<dyn std::error
                             cmds.iter().any(|cmd| {
                                 cmd.get("command")
                                     .and_then(|c| c.as_str())
-                                    .map(|s| s.contains("gitintel hooks run claude-post-tool-use") || s.contains("gitintel checkpoint"))
+                                    .map(|s| {
+                                        s.contains("gitintel hooks run claude-post-tool-use")
+                                            || s.contains("gitintel checkpoint")
+                                    })
                                     .unwrap_or(false)
                             })
                         })

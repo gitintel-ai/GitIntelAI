@@ -36,17 +36,23 @@ fn parse_period(period: &str) -> Result<Duration> {
     let period = period.trim().to_lowercase();
 
     if let Some(days) = period.strip_suffix('d') {
-        let n: i64 = days.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = days
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::days(n));
     }
 
     if let Some(weeks) = period.strip_suffix('w') {
-        let n: i64 = weeks.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = weeks
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::weeks(n));
     }
 
     if let Some(months) = period.strip_suffix('m') {
-        let n: i64 = months.parse().map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
+        let n: i64 = months
+            .parse()
+            .map_err(|_| GitIntelError::InvalidTimePeriod(period.clone()))?;
         return Ok(Duration::days(n * 30));
     }
 
@@ -54,11 +60,7 @@ fn parse_period(period: &str) -> Result<Duration> {
 }
 
 /// Run the stats command
-pub async fn run(
-    developer: Option<&str>,
-    since: &str,
-    format: &str,
-) -> Result<()> {
+pub async fn run(developer: Option<&str>, since: &str, format: &str) -> Result<()> {
     let db = Database::open()?;
     let duration = parse_period(since)?;
     let since_date = Utc::now() - duration;
@@ -71,10 +73,8 @@ pub async fn run(
     };
 
     // Collect commit SHAs from checkpoint-based attributions to avoid double-counting
-    let checkpoint_shas: std::collections::HashSet<String> = attributions
-        .iter()
-        .map(|a| a.commit_sha.clone())
-        .collect();
+    let checkpoint_shas: std::collections::HashSet<String> =
+        attributions.iter().map(|a| a.commit_sha.clone()).collect();
     let checkpoint_count = attributions.len();
 
     // Calculate statistics
@@ -92,7 +92,8 @@ pub async fn run(
     };
 
     // Aggregate by developer
-    let mut dev_map: std::collections::HashMap<String, DeveloperStats> = std::collections::HashMap::new();
+    let mut dev_map: std::collections::HashMap<String, DeveloperStats> =
+        std::collections::HashMap::new();
 
     for attr in &attributions {
         stats.total_lines += attr.total_lines as i64;
@@ -100,14 +101,16 @@ pub async fn run(
         stats.human_lines += attr.human_lines as i64;
         stats.total_cost_usd += attr.total_cost_usd;
 
-        let dev_stats = dev_map.entry(attr.author_email.clone()).or_insert(DeveloperStats {
-            email: attr.author_email.clone(),
-            commits: 0,
-            ai_lines: 0,
-            human_lines: 0,
-            ai_percentage: 0.0,
-            cost_usd: 0.0,
-        });
+        let dev_stats = dev_map
+            .entry(attr.author_email.clone())
+            .or_insert(DeveloperStats {
+                email: attr.author_email.clone(),
+                commits: 0,
+                ai_lines: 0,
+                human_lines: 0,
+                ai_percentage: 0.0,
+                cost_usd: 0.0,
+            });
 
         dev_stats.commits += 1;
         dev_stats.ai_lines += attr.ai_lines as i64;
@@ -141,20 +144,22 @@ pub async fn run(
 
     // Calculate percentages (clamp to 0..100)
     if stats.total_lines > 0 {
-        stats.ai_percentage = ((stats.ai_lines as f64 / stats.total_lines as f64) * 100.0)
-            .clamp(0.0, 100.0);
+        stats.ai_percentage =
+            ((stats.ai_lines as f64 / stats.total_lines as f64) * 100.0).clamp(0.0, 100.0);
     }
 
     for dev_stats in dev_map.values_mut() {
         let total = dev_stats.ai_lines + dev_stats.human_lines;
         if total > 0 {
-            dev_stats.ai_percentage = ((dev_stats.ai_lines as f64 / total as f64) * 100.0)
-                .clamp(0.0, 100.0);
+            dev_stats.ai_percentage =
+                ((dev_stats.ai_lines as f64 / total as f64) * 100.0).clamp(0.0, 100.0);
         }
     }
 
     stats.by_developer = dev_map.into_values().collect();
-    stats.by_developer.sort_by(|a, b| b.ai_percentage.partial_cmp(&a.ai_percentage).unwrap());
+    stats
+        .by_developer
+        .sort_by(|a, b| b.ai_percentage.partial_cmp(&a.ai_percentage).unwrap());
 
     // Output
     match format {
@@ -166,7 +171,12 @@ pub async fn run(
             for dev in &stats.by_developer {
                 println!(
                     "{},{},{},{},{:.1},{:.4}",
-                    dev.email, dev.commits, dev.ai_lines, dev.human_lines, dev.ai_percentage, dev.cost_usd
+                    dev.email,
+                    dev.commits,
+                    dev.ai_lines,
+                    dev.human_lines,
+                    dev.ai_percentage,
+                    dev.cost_usd
                 );
             }
         }
@@ -190,19 +200,17 @@ fn print_text_stats(stats: &Stats, developer: Option<&str>) {
     println!("{}", "─".repeat(60));
 
     // Summary stats
-    println!(
-        "Total Commits:  {}",
-        stats.total_commits.to_string().cyan()
-    );
-    println!(
-        "Total Lines:    {}",
-        stats.total_lines.to_string().cyan()
-    );
+    println!("Total Commits:  {}", stats.total_commits.to_string().cyan());
+    println!("Total Lines:    {}", stats.total_lines.to_string().cyan());
     println!();
 
     // AI/Human breakdown
     let ai_bar = create_bar(stats.ai_percentage, 30);
-    println!("AI-Generated:   {} {:>5.1}%", ai_bar.blue(), stats.ai_percentage);
+    println!(
+        "AI-Generated:   {} {:>5.1}%",
+        ai_bar.blue(),
+        stats.ai_percentage
+    );
     println!(
         "                {} lines",
         stats.ai_lines.to_string().blue()

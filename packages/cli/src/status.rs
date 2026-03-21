@@ -22,10 +22,7 @@ pub async fn run() -> Result<()> {
         repo_path.display().to_string().white()
     );
     if !is_git {
-        println!(
-            "  Git:           {}",
-            "not a git repository".red()
-        );
+        println!("  Git:           {}", "not a git repository".red());
         return Ok(());
     }
     println!(

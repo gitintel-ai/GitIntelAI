@@ -16,46 +16,117 @@ pub struct AgentPattern {
 /// Each entry matches against the full trailer value (name + email) case-insensitively.
 pub static KNOWN_AGENTS: &[AgentPattern] = &[
     // Claude / Anthropic
-    AgentPattern { pattern: "noreply@anthropic.com", agent_name: "Claude Code" },
-    AgentPattern { pattern: "claude code", agent_name: "Claude Code" },
-    AgentPattern { pattern: "claude sonnet", agent_name: "Claude" },
-    AgentPattern { pattern: "claude opus", agent_name: "Claude" },
-    AgentPattern { pattern: "claude haiku", agent_name: "Claude" },
-
+    AgentPattern {
+        pattern: "noreply@anthropic.com",
+        agent_name: "Claude Code",
+    },
+    AgentPattern {
+        pattern: "claude code",
+        agent_name: "Claude Code",
+    },
+    AgentPattern {
+        pattern: "claude sonnet",
+        agent_name: "Claude",
+    },
+    AgentPattern {
+        pattern: "claude opus",
+        agent_name: "Claude",
+    },
+    AgentPattern {
+        pattern: "claude haiku",
+        agent_name: "Claude",
+    },
     // GitHub Copilot
-    AgentPattern { pattern: "copilot@github.com", agent_name: "GitHub Copilot" },
-    AgentPattern { pattern: "github copilot", agent_name: "GitHub Copilot" },
-    AgentPattern { pattern: "copilot[bot]", agent_name: "GitHub Copilot" },
-
+    AgentPattern {
+        pattern: "copilot@github.com",
+        agent_name: "GitHub Copilot",
+    },
+    AgentPattern {
+        pattern: "github copilot",
+        agent_name: "GitHub Copilot",
+    },
+    AgentPattern {
+        pattern: "copilot[bot]",
+        agent_name: "GitHub Copilot",
+    },
     // Cursor
-    AgentPattern { pattern: "cursor@cursor.com", agent_name: "Cursor" },
-    AgentPattern { pattern: "cursor[bot]", agent_name: "Cursor" },
-    AgentPattern { pattern: "cursor ai", agent_name: "Cursor" },
-
+    AgentPattern {
+        pattern: "cursor@cursor.com",
+        agent_name: "Cursor",
+    },
+    AgentPattern {
+        pattern: "cursor[bot]",
+        agent_name: "Cursor",
+    },
+    AgentPattern {
+        pattern: "cursor ai",
+        agent_name: "Cursor",
+    },
     // Amazon Q Developer (formerly CodeWhisperer)
-    AgentPattern { pattern: "amazon q developer", agent_name: "Amazon Q Developer" },
-    AgentPattern { pattern: "amazon q", agent_name: "Amazon Q Developer" },
-    AgentPattern { pattern: "codewhisperer", agent_name: "Amazon Q Developer" },
-
+    AgentPattern {
+        pattern: "amazon q developer",
+        agent_name: "Amazon Q Developer",
+    },
+    AgentPattern {
+        pattern: "amazon q",
+        agent_name: "Amazon Q Developer",
+    },
+    AgentPattern {
+        pattern: "codewhisperer",
+        agent_name: "Amazon Q Developer",
+    },
     // Windsurf / Codeium
-    AgentPattern { pattern: "windsurf", agent_name: "Windsurf" },
-    AgentPattern { pattern: "codeium", agent_name: "Codeium" },
-    AgentPattern { pattern: "codeium@codeium.com", agent_name: "Codeium" },
-
+    AgentPattern {
+        pattern: "windsurf",
+        agent_name: "Windsurf",
+    },
+    AgentPattern {
+        pattern: "codeium",
+        agent_name: "Codeium",
+    },
+    AgentPattern {
+        pattern: "codeium@codeium.com",
+        agent_name: "Codeium",
+    },
     // Gemini / Google
-    AgentPattern { pattern: "gemini", agent_name: "Gemini" },
-    AgentPattern { pattern: "google code assist", agent_name: "Google Code Assist" },
-    AgentPattern { pattern: "code-assist@google.com", agent_name: "Google Code Assist" },
-
+    AgentPattern {
+        pattern: "gemini",
+        agent_name: "Gemini",
+    },
+    AgentPattern {
+        pattern: "google code assist",
+        agent_name: "Google Code Assist",
+    },
+    AgentPattern {
+        pattern: "code-assist@google.com",
+        agent_name: "Google Code Assist",
+    },
     // Devin
-    AgentPattern { pattern: "devin", agent_name: "Devin" },
-    AgentPattern { pattern: "devin-ai", agent_name: "Devin" },
-    AgentPattern { pattern: "cognition.ai", agent_name: "Devin" },
-
+    AgentPattern {
+        pattern: "devin",
+        agent_name: "Devin",
+    },
+    AgentPattern {
+        pattern: "devin-ai",
+        agent_name: "Devin",
+    },
+    AgentPattern {
+        pattern: "cognition.ai",
+        agent_name: "Devin",
+    },
     // OpenAI Codex
-    AgentPattern { pattern: "openai codex", agent_name: "OpenAI Codex" },
-    AgentPattern { pattern: "codex@openai.com", agent_name: "OpenAI Codex" },
-    AgentPattern { pattern: "codex-cli", agent_name: "OpenAI Codex" },
+    AgentPattern {
+        pattern: "openai codex",
+        agent_name: "OpenAI Codex",
+    },
+    AgentPattern {
+        pattern: "codex@openai.com",
+        agent_name: "OpenAI Codex",
+    },
+    AgentPattern {
+        pattern: "codex-cli",
+        agent_name: "OpenAI Codex",
+    },
 ];
 
 /// Match a Co-Authored-By trailer value against known agents.
@@ -68,7 +139,11 @@ pub fn match_agent(trailer_value: &str) -> Option<(&'static str, f64)> {
     for agent in KNOWN_AGENTS {
         if lower.contains(agent.pattern) {
             // Email matches get higher confidence
-            let confidence = if agent.pattern.contains('@') { 1.0 } else { 0.9 };
+            let confidence = if agent.pattern.contains('@') {
+                1.0
+            } else {
+                0.9
+            };
             return Some((agent.agent_name, confidence));
         }
     }

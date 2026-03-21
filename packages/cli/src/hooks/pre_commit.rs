@@ -19,10 +19,7 @@ pub async fn run() -> Result<()> {
     for cp in &checkpoints {
         let path = std::path::Path::new(&cp.file_path);
         if !path.exists() {
-            tracing::warn!(
-                "Checkpoint references non-existent file: {}",
-                cp.file_path
-            );
+            tracing::warn!("Checkpoint references non-existent file: {}", cp.file_path);
         }
     }
 

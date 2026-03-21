@@ -107,10 +107,13 @@ pub async fn run() -> Result<()> {
         session.cost_usd += cp.cost_usd;
         total_cost += cp.cost_usd;
 
-        let file_attr = session.files.entry(cp.file_path.clone()).or_insert_with(|| FileAttribution {
-            ai_lines: Vec::new(),
-            human_lines: Vec::new(),
-        });
+        let file_attr = session
+            .files
+            .entry(cp.file_path.clone())
+            .or_insert_with(|| FileAttribution {
+                ai_lines: Vec::new(),
+                human_lines: Vec::new(),
+            });
 
         file_attr.ai_lines.push((cp.line_start, cp.line_end));
     }
@@ -179,7 +182,15 @@ pub async fn run() -> Result<()> {
     let log_yaml = serde_yaml::to_string(&log)?;
 
     let status = Command::new(&config.git_path)
-        .args(["notes", "--ref=refs/ai/authorship", "add", "-f", "-m", &log_yaml, &commit_sha])
+        .args([
+            "notes",
+            "--ref=refs/ai/authorship",
+            "add",
+            "-f",
+            "-m",
+            &log_yaml,
+            &commit_sha,
+        ])
         .status()?;
 
     if !status.success() {
@@ -210,7 +221,10 @@ pub async fn run() -> Result<()> {
         "{} Commit: {}% AI ({}) | {}% Human | Cost: ${:.4}",
         "✓".green(),
         format!("{:.1}", ai_pct).blue(),
-        log.agent_sessions.first().map(|s| s.agent.as_str()).unwrap_or("AI"),
+        log.agent_sessions
+            .first()
+            .map(|s| s.agent.as_str())
+            .unwrap_or("AI"),
         format!("{:.1}", 100.0 - ai_pct).green(),
         total_cost
     );
@@ -225,7 +239,10 @@ fn parse_diff_stat_lines(stat: &str) -> i32 {
     if let Some(ins_match) = stat.find("insertion") {
         let before = &stat[..ins_match];
         if let Some(num_start) = before.rfind(|c: char| !c.is_ascii_digit() && c != ' ') {
-            let num_str: String = before[num_start..].chars().filter(|c| c.is_ascii_digit()).collect();
+            let num_str: String = before[num_start..]
+                .chars()
+                .filter(|c| c.is_ascii_digit())
+                .collect();
             if let Ok(n) = num_str.parse::<i32>() {
                 total += n;
             }
@@ -235,7 +252,10 @@ fn parse_diff_stat_lines(stat: &str) -> i32 {
     if let Some(del_match) = stat.find("deletion") {
         let before = &stat[..del_match];
         if let Some(num_start) = before.rfind(|c: char| !c.is_ascii_digit() && c != ' ') {
-            let num_str: String = before[num_start..].chars().filter(|c| c.is_ascii_digit()).collect();
+            let num_str: String = before[num_start..]
+                .chars()
+                .filter(|c| c.is_ascii_digit())
+                .collect();
             if let Ok(n) = num_str.parse::<i32>() {
                 total += n;
             }

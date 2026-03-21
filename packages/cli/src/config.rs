@@ -106,9 +106,9 @@ impl Config {
                 })?
             }
             "otel.port" => {
-                self.otel.port = value.parse().map_err(|_| {
-                    GitIntelError::Config(format!("Invalid port value: {}", value))
-                })?
+                self.otel.port = value
+                    .parse()
+                    .map_err(|_| GitIntelError::Config(format!("Invalid port value: {}", value)))?
             }
             "cost.currency" => self.cost.currency = value.to_string(),
             "cost.alert_threshold_daily" => {
@@ -116,7 +116,12 @@ impl Config {
                     GitIntelError::Config(format!("Invalid number value: {}", value))
                 })?
             }
-            _ => return Err(GitIntelError::Config(format!("Unknown config key: {}", key))),
+            _ => {
+                return Err(GitIntelError::Config(format!(
+                    "Unknown config key: {}",
+                    key
+                )))
+            }
         }
         Ok(())
     }
@@ -124,7 +129,8 @@ impl Config {
 
 /// Get the GitIntel home directory
 pub fn get_gitintel_home() -> Result<PathBuf> {
-    let home = dirs::home_dir().ok_or_else(|| GitIntelError::Config("Cannot find home directory".to_string()))?;
+    let home = dirs::home_dir()
+        .ok_or_else(|| GitIntelError::Config("Cannot find home directory".to_string()))?;
     Ok(home.join(".gitintel"))
 }
 
@@ -191,7 +197,14 @@ pub async fn run(json: bool, set: Option<&str>) -> Result<()> {
         println!("Cloud Sync:");
         println!("  Enabled: {}", config.cloud_sync.enabled);
         println!("  Endpoint: {}", config.cloud_sync.endpoint);
-        println!("  API Key: {}", if config.cloud_sync.api_key.is_empty() { "(not set)" } else { "(set)" });
+        println!(
+            "  API Key: {}",
+            if config.cloud_sync.api_key.is_empty() {
+                "(not set)"
+            } else {
+                "(set)"
+            }
+        );
         println!();
         println!("OpenTelemetry:");
         println!("  Enabled: {}", config.otel.enabled);
@@ -199,7 +212,10 @@ pub async fn run(json: bool, set: Option<&str>) -> Result<()> {
         println!();
         println!("Cost:");
         println!("  Currency: {}", config.cost.currency);
-        println!("  Daily alert threshold: ${:.2}", config.cost.alert_threshold_daily);
+        println!(
+            "  Daily alert threshold: ${:.2}",
+            config.cost.alert_threshold_daily
+        );
     }
 
     Ok(())

@@ -1,19 +1,23 @@
-import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Team Setup — GitIntel AI Docs",
-  description: "How to share AI attribution with your team using git notes, cloud sync, and the self-hosted dashboard.",
+  description:
+    "How to share AI attribution with your team using git notes, cloud sync, and the self-hosted dashboard.",
 };
 
 export default function TeamSetupPage() {
   return (
     <article className="max-w-none">
       <div className="mb-8">
-        <Badge variant="secondary" className="mb-3">Documentation</Badge>
+        <Badge variant="secondary" className="mb-3">
+          Documentation
+        </Badge>
         <h1 className="text-3xl font-bold tracking-tight">Team Setup</h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          Share attribution data with your team using git notes sync, optional cloud sync, and the self-hosted dashboard.
+          Share attribution data with your team using git notes sync, optional cloud sync, and the
+          self-hosted dashboard.
         </p>
       </div>
 
@@ -21,7 +25,8 @@ export default function TeamSetupPage() {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-2">Sharing Attribution via Git Notes</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          By default, git notes do not push/fetch automatically. Configure your remote to sync attribution notes alongside code:
+          By default, git notes do not push/fetch automatically. Configure your remote to sync
+          attribution notes alongside code:
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre mb-4">{`# Configure fetch to pull attribution notes from origin
 git config --add remote.origin.fetch '+refs/ai/authorship/*:refs/ai/authorship/*'
@@ -31,12 +36,21 @@ git config --add remote.origin.push 'refs/ai/authorship/*'
 
 # Push attribution for the current branch
 git push origin refs/ai/authorship/*`}</div>
-        <p className="text-sm text-muted-foreground mb-2">Or add this to your <code className="rounded bg-muted px-1 font-mono text-xs">.git/config</code> (or <code className="rounded bg-muted px-1 font-mono text-xs">~/.gitconfig</code> for all repos):</p>
+        <p className="text-sm text-muted-foreground mb-2">
+          Or add this to your{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">.git/config</code> (or{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">~/.gitconfig</code> for all
+          repos):
+        </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`[remote "origin"]
     fetch = +refs/ai/authorship/*:refs/ai/authorship/*
     push  = refs/ai/authorship/*`}</div>
         <p className="text-sm text-muted-foreground mt-3">
-          Once configured, <code className="rounded bg-muted px-1 font-mono text-xs">git push</code> and <code className="rounded bg-muted px-1 font-mono text-xs">git fetch</code> will automatically sync attribution data. Team members running <code className="rounded bg-muted px-1 font-mono text-xs">gitintel stats</code> will see attribution for all commits.
+          Once configured, <code className="rounded bg-muted px-1 font-mono text-xs">git push</code>{" "}
+          and <code className="rounded bg-muted px-1 font-mono text-xs">git fetch</code> will
+          automatically sync attribution data. Team members running{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">gitintel stats</code> will see
+          attribution for all commits.
         </p>
       </section>
 
@@ -44,7 +58,8 @@ git push origin refs/ai/authorship/*`}</div>
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-2">Cloud Sync (Optional)</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          GitIntel can sync attribution and cost data to a central API server for team dashboards. This is <strong>off by default</strong>.
+          GitIntel can sync attribution and cost data to a central API server for team dashboards.
+          This is <strong>off by default</strong>.
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre mb-3">{`# Enable cloud sync
 gitintel config --set cloudSync.enabled=true
@@ -62,7 +77,8 @@ gitintel sync --dry-run`}</div>
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-2">Self-Hosted Dashboard</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          The dashboard provides team-level views: adoption heatmaps, cost trend charts, PR cost annotations, and budget alerts.
+          The dashboard provides team-level views: adoption heatmaps, cost trend charts, PR cost
+          annotations, and budget alerts.
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre mb-4">{`# Start the full stack locally (requires Docker)
 cd infra/docker
@@ -100,7 +116,8 @@ docker compose up -d
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-2">Budget Alerts</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Configure budget alerts via the dashboard UI or the API. Alerts can be set per team, per developer, or per repository.
+          Configure budget alerts via the dashboard UI or the API. Alerts can be set per team, per
+          developer, or per repository.
         </p>
         <div className="rounded-lg border bg-muted/40 p-4 text-sm">
           <p className="font-medium mb-1">Alert conditions</p>

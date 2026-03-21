@@ -4,14 +4,7 @@
  */
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { sql } from "drizzle-orm";
-import {
-  organizations,
-  repositories,
-  attributions,
-  costSessions,
-  budgetAlerts,
-} from "./schema";
+import { attributions, budgetAlerts, costSessions, organizations, repositories } from "./schema";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -39,28 +32,18 @@ function randomDate(daysAgo: number): Date {
 }
 
 function randomSha(): string {
-  return Array.from({ length: 40 }, () =>
-    Math.floor(Math.random() * 16).toString(16)
-  ).join("");
+  return Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
 }
 
 const agents = ["Claude Code", "Cursor", "GitHub Copilot"];
-const models = [
-  "claude-opus-4-5",
-  "claude-sonnet-4-5",
-  "gpt-4o",
-  "claude-haiku-3.5",
-];
+const models = ["claude-opus-4-5", "claude-sonnet-4-5", "gpt-4o", "claude-haiku-3.5"];
 
 // ── Seed ─────────────────────────────────────────────────────────
 async function seed() {
   console.log("Seeding database...");
 
   // 1. Organization
-  const [org] = await db
-    .insert(organizations)
-    .values({ name: "Acme Corp" })
-    .returning();
+  const [org] = await db.insert(organizations).values({ name: "Acme Corp" }).returning();
   console.log(`  Created org: ${org.name} (${org.id})`);
 
   // 2. Repositories (3)
@@ -78,7 +61,7 @@ async function seed() {
         name: r.name,
         remoteUrl: r.remoteUrl,
         defaultBranch: "main",
-      }))
+      })),
     )
     .returning();
   console.log(`  Created ${repos.length} repositories`);

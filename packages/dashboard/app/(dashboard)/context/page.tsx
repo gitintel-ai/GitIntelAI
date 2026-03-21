@@ -1,5 +1,5 @@
-import { FileCode } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { FileCode } from "lucide-react";
 
 export default function ContextPage() {
   return (

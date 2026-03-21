@@ -1,6 +1,6 @@
-import { Hono } from "hono";
 import { sql } from "drizzle-orm";
-import { db, repositories, attributions, costSessions } from "../db";
+import { Hono } from "hono";
+import { attributions, costSessions, db, repositories } from "../db";
 
 export const repoRoutes = new Hono();
 
@@ -53,7 +53,7 @@ repoRoutes.get("/", async (c) => {
           totalCostUsd: Number(stats.totalCost),
           developers: Number(stats.developers),
         };
-      })
+      }),
     );
 
     return c.json({ repositories: reposWithStats });
@@ -71,10 +71,7 @@ repoRoutes.get("/:id", async (c) => {
   const repoId = c.req.param("id");
 
   try {
-    const [repo] = await db
-      .select()
-      .from(repositories)
-      .where(sql`${repositories.id} = ${repoId}`);
+    const [repo] = await db.select().from(repositories).where(sql`${repositories.id} = ${repoId}`);
 
     if (!repo) {
       return c.json({ error: "Repository not found" }, 404);
@@ -137,9 +134,7 @@ repoRoutes.get("/:id", async (c) => {
       .orderBy(sql`date(${costSessions.startedAt})`);
 
     const aiPct =
-      Number(stats.totalLines) > 0
-        ? (Number(stats.aiLines) / Number(stats.totalLines)) * 100
-        : 0;
+      Number(stats.totalLines) > 0 ? (Number(stats.aiLines) / Number(stats.totalLines)) * 100 : 0;
 
     return c.json({
       id: repo.id,
@@ -168,10 +163,7 @@ repoRoutes.get("/:id", async (c) => {
         commits: Number(r.commits),
         aiLines: Number(r.aiLines),
         humanLines: Number(r.humanLines),
-        aiPct:
-          Number(r.totalLines) > 0
-            ? (Number(r.aiLines) / Number(r.totalLines)) * 100
-            : 0,
+        aiPct: Number(r.totalLines) > 0 ? (Number(r.aiLines) / Number(r.totalLines)) * 100 : 0,
         costUsd: Number(r.costUsd),
       })),
       dailyCosts: dailyCosts.map((r) => ({

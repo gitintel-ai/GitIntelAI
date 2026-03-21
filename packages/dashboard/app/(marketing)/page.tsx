@@ -1,6 +1,4 @@
-import type { Metadata } from "next";
-import type { Route } from "next";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -20,21 +17,24 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  GitBranch,
-  DollarSign,
-  Brain,
-  Trophy,
+  ArrowRight,
+  BarChart3,
   Bell,
+  Brain,
+  Check,
+  Code2,
+  DollarSign,
+  GitBranch,
+  Minus,
   Shield,
   Terminal,
-  ArrowRight,
-  Check,
+  Trophy,
   X,
-  Minus,
-  Code2,
-  BarChart3,
   Zap,
 } from "lucide-react";
+import type { Metadata } from "next";
+import type { Route } from "next";
+import Link from "next/link";
 import { FaqSection } from "./faq-section";
 
 export const metadata: Metadata = {
@@ -235,7 +235,7 @@ const steps = [
     title: "Write Code Normally",
     description:
       "Keep using your favorite AI coding assistant. GitIntel detects AI-authored code automatically when you commit. No workflow changes, no extra steps.",
-    code: "git commit -m \"Add auth flow\" # gitintel tracks automatically",
+    code: 'git commit -m "Add auth flow" # gitintel tracks automatically',
   },
   {
     step: 3,
@@ -363,9 +363,9 @@ export default function LandingPage() {
               You Ship
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-              GitIntel AI provides git-native AI adoption tracking, cost
-              intelligence, and context optimization for development teams.
-              Track every line, measure every dollar, optimize every token.
+              GitIntel AI provides git-native AI adoption tracking, cost intelligence, and context
+              optimization for development teams. Track every line, measure every dollar, optimize
+              every token.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" asChild>
@@ -393,9 +393,7 @@ export default function LandingPage() {
                 <div className="h-3 w-3 rounded-full bg-red-500" />
                 <div className="h-3 w-3 rounded-full bg-yellow-500" />
                 <div className="h-3 w-3 rounded-full bg-green-500" />
-                <span className="ml-2 text-xs text-muted-foreground">
-                  terminal
-                </span>
+                <span className="ml-2 text-xs text-muted-foreground">terminal</span>
               </div>
               <div className="bg-[hsl(222,84%,4.9%)] p-6 font-mono text-sm leading-relaxed text-[hsl(210,40%,98%)]">
                 <p>
@@ -407,12 +405,12 @@ export default function LandingPage() {
                 <p className="text-muted-foreground">Period: last 30d</p>
                 <p className="text-muted-foreground">────────────────────────────────────────</p>
                 <p className="mt-2">
-                  Total Commits:{" "}
-                  <span className="text-blue-400">142</span>{"   "}Total Lines:{" "}
-                  <span className="text-blue-400">18,340</span>
+                  Total Commits: <span className="text-blue-400">142</span>
+                  {"   "}Total Lines: <span className="text-blue-400">18,340</span>
                 </p>
                 <p className="mt-2">
-                  <span className="text-green-400">AI-Generated:</span>{"   "}
+                  <span className="text-green-400">AI-Generated:</span>
+                  {"   "}
                   <span className="text-green-400">43.2%</span> (7,923 lines)
                 </p>
                 <p>
@@ -420,14 +418,14 @@ export default function LandingPage() {
                   <span className="text-blue-400">56.8%</span> (10,417 lines)
                 </p>
                 <p className="mt-2">
-                  Total Cost:{" "}
-                  <span className="text-yellow-400">$47.23</span>{"  "}Avg/Commit:{" "}
-                  <span className="text-yellow-400">$0.33</span>
+                  Total Cost: <span className="text-yellow-400">$47.23</span>
+                  {"  "}Avg/Commit: <span className="text-yellow-400">$0.33</span>
                 </p>
-                <p className="mt-3 text-muted-foreground">────────────────────────────────────────</p>
+                <p className="mt-3 text-muted-foreground">
+                  ────────────────────────────────────────
+                </p>
                 <p>
-                  <span className="text-green-400">$</span>{" "}
-                  <span className="animate-pulse">_</span>
+                  <span className="text-green-400">$</span> <span className="animate-pulse">_</span>
                 </p>
               </div>
             </div>
@@ -443,59 +441,50 @@ export default function LandingPage() {
               The AI Adoption Blindspot
             </h2>
             <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              Your team is shipping AI-generated code every day, but you have no
-              idea how much. Engineering leaders cannot answer basic questions
-              about their AI investment.
+              Your team is shipping AI-generated code every day, but you have no idea how much.
+              Engineering leaders cannot answer basic questions about their AI investment.
             </p>
           </div>
           <div className="mx-auto mt-14 grid max-w-5xl gap-8 md:grid-cols-3">
             <Card className="text-center">
               <CardHeader>
-                <CardTitle className="text-5xl font-extrabold text-primary">
-                  ???
-                </CardTitle>
+                <CardTitle className="text-5xl font-extrabold text-primary">???</CardTitle>
                 <CardDescription className="text-base">
                   What percentage of your codebase is AI-generated?
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Most teams cannot tell you whether 10% or 80% of their shipped
-                  code was written by AI. Without measurement, there is no
-                  management.
+                  Most teams cannot tell you whether 10% or 80% of their shipped code was written by
+                  AI. Without measurement, there is no management.
                 </p>
               </CardContent>
             </Card>
             <Card className="text-center">
               <CardHeader>
-                <CardTitle className="text-5xl font-extrabold text-primary">
-                  $???
-                </CardTitle>
+                <CardTitle className="text-5xl font-extrabold text-primary">$???</CardTitle>
                 <CardDescription className="text-base">
                   How much are you spending on AI coding tools?
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Token costs add up fast. A single developer can burn through
-                  hundreds of dollars a month without anyone noticing until the
-                  invoice arrives.
+                  Token costs add up fast. A single developer can burn through hundreds of dollars a
+                  month without anyone noticing until the invoice arrives.
                 </p>
               </CardContent>
             </Card>
             <Card className="text-center">
               <CardHeader>
-                <CardTitle className="text-5xl font-extrabold text-primary">
-                  ~40%
-                </CardTitle>
+                <CardTitle className="text-5xl font-extrabold text-primary">~40%</CardTitle>
                 <CardDescription className="text-base">
                   Of context tokens are wasted on redundant instructions
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
-                  Bloated CLAUDE.md files and unoptimized context means you are
-                  paying for tokens that do not improve output quality.
+                  Bloated CLAUDE.md files and unoptimized context means you are paying for tokens
+                  that do not improve output quality.
                 </p>
               </CardContent>
             </Card>
@@ -511,8 +500,8 @@ export default function LandingPage() {
               Everything You Need to Track AI Adoption
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              GitIntel AI gives engineering leaders complete visibility into how
-              AI tools are being used across their organization.
+              GitIntel AI gives engineering leaders complete visibility into how AI tools are being
+              used across their organization.
             </p>
           </div>
           <div className="mx-auto mt-14 grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -525,9 +514,7 @@ export default function LandingPage() {
                   <CardTitle className="text-lg">{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -543,8 +530,8 @@ export default function LandingPage() {
               Get Started in Three Steps
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              GitIntel AI integrates seamlessly into your existing git workflow.
-              No new tools to learn, no workflow changes required.
+              GitIntel AI integrates seamlessly into your existing git workflow. No new tools to
+              learn, no workflow changes required.
             </p>
           </div>
           <div className="mx-auto mt-14 grid max-w-5xl gap-8 lg:grid-cols-3">
@@ -556,9 +543,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-xl font-semibold">{step.title}</h3>
                 </div>
-                <p className="mb-4 text-sm text-muted-foreground">
-                  {step.description}
-                </p>
+                <p className="mb-4 text-sm text-muted-foreground">{step.description}</p>
                 <div className="overflow-hidden rounded-md border bg-[hsl(222,84%,4.9%)] px-4 py-3 font-mono text-sm text-[hsl(210,40%,98%)]">
                   <span className="text-green-400">$</span> {step.code}
                 </div>
@@ -576,8 +561,7 @@ export default function LandingPage() {
               How GitIntel AI Compares
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              See how GitIntel AI stacks up against other approaches to AI code
-              tracking.
+              See how GitIntel AI stacks up against other approaches to AI code tracking.
             </p>
           </div>
           <div className="mx-auto mt-14 max-w-4xl">
@@ -588,22 +572,16 @@ export default function LandingPage() {
                     <TableRow>
                       <TableHead className="w-[40%]">Feature</TableHead>
                       <TableHead className="text-center">
-                        <span className="font-bold text-foreground">
-                          GitIntel AI
-                        </span>
+                        <span className="font-bold text-foreground">GitIntel AI</span>
                       </TableHead>
                       <TableHead className="text-center">gitai</TableHead>
-                      <TableHead className="text-center">
-                        Manual Tracking
-                      </TableHead>
+                      <TableHead className="text-center">Manual Tracking</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {comparisonFeatures.map((row) => (
                       <TableRow key={row.feature}>
-                        <TableCell className="font-medium">
-                          {row.feature}
-                        </TableCell>
+                        <TableCell className="font-medium">{row.feature}</TableCell>
                         <TableCell>
                           <div className="flex justify-center">
                             <ComparisonCell value={row.gitintel} />
@@ -637,19 +615,15 @@ export default function LandingPage() {
               Simple, Transparent Pricing
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              Start free with the open-source CLI. Upgrade when you need team
-              collaboration and enterprise features.
+              Start free with the open-source CLI. Upgrade when you need team collaboration and
+              enterprise features.
             </p>
           </div>
           <div className="mx-auto mt-14 grid max-w-6xl gap-8 lg:grid-cols-3">
             {pricingPlans.map((plan) => (
               <Card
                 key={plan.name}
-                className={
-                  plan.highlighted
-                    ? "relative border-primary shadow-lg"
-                    : "relative"
-                }
+                className={plan.highlighted ? "relative border-primary shadow-lg" : "relative"}
               >
                 {plan.highlighted && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -660,13 +634,9 @@ export default function LandingPage() {
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
-                    <span className="text-4xl font-extrabold">
-                      {plan.price}
-                    </span>
+                    <span className="text-4xl font-extrabold">{plan.price}</span>
                     {plan.period !== "forever" && (
-                      <span className="ml-1 text-sm text-muted-foreground">
-                        / {plan.period}
-                      </span>
+                      <span className="ml-1 text-sm text-muted-foreground">/ {plan.period}</span>
                     )}
                   </div>
                 </CardHeader>
@@ -681,11 +651,7 @@ export default function LandingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    className="w-full"
-                    variant={plan.ctaVariant}
-                    asChild
-                  >
+                  <Button className="w-full" variant={plan.ctaVariant} asChild>
                     {plan.name === "Enterprise" ? (
                       <a href="mailto:sales@gitintel.com">{plan.cta}</a>
                     ) : (
@@ -707,8 +673,8 @@ export default function LandingPage() {
               Frequently Asked Questions
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              Everything you need to know about GitIntel AI. Can&apos;t find the
-              answer you&apos;re looking for? Reach out to our team.
+              Everything you need to know about GitIntel AI. Can&apos;t find the answer you&apos;re
+              looking for? Reach out to our team.
             </p>
           </div>
           <div className="mx-auto mt-14 max-w-3xl">
@@ -725,9 +691,8 @@ export default function LandingPage() {
               Start Tracking Your AI Code Today
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              Join thousands of developers who use GitIntel AI to understand
-              their AI adoption, control costs, and optimize their workflow.
-              Open source and free to get started.
+              Join thousands of developers who use GitIntel AI to understand their AI adoption,
+              control costs, and optimize their workflow. Open source and free to get started.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" asChild>

@@ -1,19 +1,23 @@
-import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Agent Integrations — GitIntel AI Docs",
-  description: "How to integrate GitIntel with Claude Code, Cursor, GitHub Copilot, Codex, and Gemini CLI.",
+  description:
+    "How to integrate GitIntel with Claude Code, Cursor, GitHub Copilot, Codex, and Gemini CLI.",
 };
 
 export default function AgentIntegrationsPage() {
   return (
     <article className="max-w-none">
       <div className="mb-8">
-        <Badge variant="secondary" className="mb-3">Documentation</Badge>
+        <Badge variant="secondary" className="mb-3">
+          Documentation
+        </Badge>
         <h1 className="text-3xl font-bold tracking-tight">Agent Integrations</h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          GitIntel works with any AI coding agent. Here&apos;s how to integrate with the most popular ones.
+          GitIntel works with any AI coding agent. Here&apos;s how to integrate with the most
+          popular ones.
         </p>
       </div>
 
@@ -21,13 +25,17 @@ export default function AgentIntegrationsPage() {
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-1">Claude Code</h2>
         <p className="text-muted-foreground text-sm mb-4">
-          GitIntel integrates with Claude Code in three ways: hook-based checkpoints, OTel cost capture, or both.
+          GitIntel integrates with Claude Code in three ways: hook-based checkpoints, OTel cost
+          capture, or both.
         </p>
 
         <div className="mb-4">
-          <p className="font-semibold text-sm mb-2">Option A: Hook-based (automatic line attribution)</p>
+          <p className="font-semibold text-sm mb-2">
+            Option A: Hook-based (automatic line attribution)
+          </p>
           <p className="text-sm text-muted-foreground mb-2">
-            Add this to your project&apos;s <code className="rounded bg-muted px-1 font-mono text-xs">CLAUDE.md</code>:
+            Add this to your project&apos;s{" "}
+            <code className="rounded bg-muted px-1 font-mono text-xs">CLAUDE.md</code>:
           </p>
           <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`## GitIntel Integration
 
@@ -46,7 +54,8 @@ gitintel checkpoint \\
         <div className="mb-4">
           <p className="font-semibold text-sm mb-2">Option B: OTel (automatic cost tracking)</p>
           <p className="text-sm text-muted-foreground mb-2">
-            Claude Code exports native OpenTelemetry metrics. Point them at GitIntel&apos;s local collector:
+            Claude Code exports native OpenTelemetry metrics. Point them at GitIntel&apos;s local
+            collector:
           </p>
           <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`# Add to your shell profile (~/.bashrc, ~/.zshrc)
 export CLAUDE_CODE_ENABLE_TELEMETRY=1
@@ -55,7 +64,8 @@ export OTEL_EXPORTER_OTLP_PROTOCOL=grpc`}</div>
         </div>
 
         <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/40 dark:text-blue-200">
-          <strong>Recommended:</strong> Use OTel for automatic cost capture + manual checkpoints for line-level attribution. Together they give you the full picture.
+          <strong>Recommended:</strong> Use OTel for automatic cost capture + manual checkpoints for
+          line-level attribution. Together they give you the full picture.
         </div>
       </section>
 
@@ -63,7 +73,8 @@ export OTEL_EXPORTER_OTLP_PROTOCOL=grpc`}</div>
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-1">Cursor</h2>
         <p className="text-muted-foreground text-sm mb-4">
-          Cursor does not yet have a native telemetry export. Use the checkpoint command from Cursor&apos;s terminal.
+          Cursor does not yet have a native telemetry export. Use the checkpoint command from
+          Cursor&apos;s terminal.
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`# Run in Cursor's integrated terminal after an AI edit
 gitintel checkpoint \\
@@ -78,8 +89,8 @@ gitintel checkpoint \\
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-1">GitHub Copilot</h2>
         <p className="text-muted-foreground text-sm mb-4">
-          Copilot operates inline and does not expose session IDs or line ranges natively.
-          The best approach is to checkpoint files at commit time rather than per-suggestion.
+          Copilot operates inline and does not expose session IDs or line ranges natively. The best
+          approach is to checkpoint files at commit time rather than per-suggestion.
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`# After a Copilot-heavy session, before committing:
 gitintel checkpoint \\
@@ -89,7 +100,9 @@ gitintel checkpoint \\
   --file "src/utils/formatDate.ts" \\
   --lines "1-45"`}</div>
         <p className="text-sm text-muted-foreground mt-3">
-          <strong>Coming soon:</strong> A VS Code extension that calls <code className="rounded bg-muted px-1 font-mono text-xs">gitintel checkpoint</code> automatically on each Copilot suggestion accept.
+          <strong>Coming soon:</strong> A VS Code extension that calls{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">gitintel checkpoint</code>{" "}
+          automatically on each Copilot suggestion accept.
         </p>
       </section>
 
@@ -108,8 +121,9 @@ gitintel checkpoint \\
       <section className="mb-10">
         <h2 className="text-xl font-semibold mb-1">Any Other Agent</h2>
         <p className="text-muted-foreground text-sm mb-4">
-          For any AI tool (ChatGPT, local models, etc.), the pattern is the same.
-          The checkpoint just needs to be called before <code className="rounded bg-muted px-1 font-mono text-xs">git commit</code>.
+          For any AI tool (ChatGPT, local models, etc.), the pattern is the same. The checkpoint
+          just needs to be called before{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">git commit</code>.
         </p>
         <div className="rounded-lg bg-muted p-4 font-mono text-xs whitespace-pre">{`gitintel checkpoint \\
   --agent    "My Agent" \\

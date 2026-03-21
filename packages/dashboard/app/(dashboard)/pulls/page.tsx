@@ -1,14 +1,12 @@
-import { GitPullRequest } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { GitPullRequest } from "lucide-react";
 
 export default function PullRequestsPage() {
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Pull Requests</h1>
-        <p className="text-muted-foreground">
-          AI cost annotations for pull requests
-        </p>
+        <p className="text-muted-foreground">AI cost annotations for pull requests</p>
       </div>
 
       <EmptyState

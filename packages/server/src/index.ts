@@ -5,16 +5,16 @@ import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 
 import { authMiddleware } from "./middleware/auth";
+import { alertRoutes } from "./routes/alerts";
+import apiKeyRoutes from "./routes/api-keys";
 import { attributionRoutes } from "./routes/attribution";
+import auditRoutes from "./routes/audit";
 import { costRoutes } from "./routes/cost";
+import { repoRoutes } from "./routes/repos";
+import scimRoutes from "./routes/scim";
 import { statsRoutes } from "./routes/stats";
 import { syncRoutes } from "./routes/sync";
 import { webhookRoutes } from "./routes/webhooks";
-import { alertRoutes } from "./routes/alerts";
-import { repoRoutes } from "./routes/repos";
-import apiKeyRoutes from "./routes/api-keys";
-import auditRoutes from "./routes/audit";
-import scimRoutes from "./routes/scim";
 
 const app = new Hono();
 
@@ -78,8 +78,8 @@ app.notFound((c) => {
 
 app.onError((err, c) => {
   // Handle Hono HTTPException (from validators, etc.)
-  if ("status" in err && typeof (err as any).status === "number") {
-    const status = (err as any).status as number;
+  if ("status" in err && typeof (err as Record<string, unknown>).status === "number") {
+    const status = (err as Record<string, unknown>).status as number;
     return c.json({ error: err.message || "Request error" }, status);
   }
 

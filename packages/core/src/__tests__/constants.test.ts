@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { MODEL_PRICING, DEFAULT_CONFIG, SCHEMA_VERSION, SUPPORTED_AGENTS } from "../constants";
+import { DEFAULT_CONFIG, MODEL_PRICING, SCHEMA_VERSION, SUPPORTED_AGENTS } from "../constants";
 
 // ════════════════════════════════════════════════════════════════
 // MODEL_PRICING
@@ -47,7 +47,9 @@ describe("MODEL_PRICING", () => {
   });
 
   test("includes OpenAI models", () => {
-    const openaiModels = MODEL_PRICING.filter((p) => p.model.startsWith("gpt-") || p.model === "o3");
+    const openaiModels = MODEL_PRICING.filter(
+      (p) => p.model.startsWith("gpt-") || p.model === "o3",
+    );
     expect(openaiModels.length).toBe(2);
   });
 
@@ -64,10 +66,10 @@ describe("MODEL_PRICING", () => {
   test("claude-opus-4-5 has correct pricing", () => {
     const opus = MODEL_PRICING.find((p) => p.model === "claude-opus-4-5");
     expect(opus).toBeDefined();
-    expect(opus!.inputPerMtok).toBe(15.0);
-    expect(opus!.outputPerMtok).toBe(75.0);
-    expect(opus!.cacheWritePerMtok).toBe(18.75);
-    expect(opus!.cacheReadPerMtok).toBe(1.5);
+    expect(opus?.inputPerMtok).toBe(15.0);
+    expect(opus?.outputPerMtok).toBe(75.0);
+    expect(opus?.cacheWritePerMtok).toBe(18.75);
+    expect(opus?.cacheReadPerMtok).toBe(1.5);
   });
 });
 

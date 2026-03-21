@@ -1,7 +1,7 @@
-import { Hono } from "hono";
-import { sql } from "drizzle-orm";
-import { db, attributions } from "../db";
 import { getDateFromPeriod } from "@gitintel/core";
+import { sql } from "drizzle-orm";
+import { Hono } from "hono";
+import { attributions, db } from "../db";
 
 export const statsRoutes = new Hono();
 
@@ -11,7 +11,7 @@ export const statsRoutes = new Hono();
 
 statsRoutes.get("/team", async (c) => {
   const period = c.req.query("period") || "30d";
-  const auth = c.get("auth");
+  const _auth = c.get("auth");
 
   try {
     const sinceDate = getDateFromPeriod(period).toISOString();
@@ -39,12 +39,10 @@ statsRoutes.get("/team", async (c) => {
         totalLines: acc.totalLines + Number(row.totalLines || 0),
         totalCost: acc.totalCost + Number(row.totalCost || 0),
       }),
-      { commits: 0, aiLines: 0, humanLines: 0, totalLines: 0, totalCost: 0 }
+      { commits: 0, aiLines: 0, humanLines: 0, totalLines: 0, totalCost: 0 },
     );
 
-    const aiPercentage = totals.totalLines > 0
-      ? (totals.aiLines / totals.totalLines) * 100
-      : 0;
+    const aiPercentage = totals.totalLines > 0 ? (totals.aiLines / totals.totalLines) * 100 : 0;
 
     return c.json({
       period,
@@ -60,9 +58,7 @@ statsRoutes.get("/team", async (c) => {
         aiLines: Number(r.aiLines || 0),
         humanLines: Number(r.humanLines || 0),
         aiPercentage:
-          Number(r.totalLines) > 0
-            ? (Number(r.aiLines || 0) / Number(r.totalLines)) * 100
-            : 0,
+          Number(r.totalLines) > 0 ? (Number(r.aiLines || 0) / Number(r.totalLines)) * 100 : 0,
         costUsd: Number(r.totalCost || 0),
       })),
     });
@@ -103,9 +99,7 @@ statsRoutes.get("/developers", async (c) => {
         aiLines: Number(r.aiLines || 0),
         humanLines: Number(r.humanLines || 0),
         aiPercentage:
-          Number(r.totalLines) > 0
-            ? (Number(r.aiLines || 0) / Number(r.totalLines)) * 100
-            : 0,
+          Number(r.totalLines) > 0 ? (Number(r.aiLines || 0) / Number(r.totalLines)) * 100 : 0,
         costUsd: Number(r.totalCost || 0),
       })),
     });
@@ -129,7 +123,9 @@ statsRoutes.get("/developer/:id", async (c) => {
     const results = await db
       .select()
       .from(attributions)
-      .where(sql`${attributions.authorEmail} = ${email} AND ${attributions.authoredAt} >= ${sinceDate}`)
+      .where(
+        sql`${attributions.authorEmail} = ${email} AND ${attributions.authoredAt} >= ${sinceDate}`,
+      )
       .orderBy(sql`${attributions.authoredAt} DESC`);
 
     const totals = results.reduce(
@@ -140,17 +136,14 @@ statsRoutes.get("/developer/:id", async (c) => {
         totalLines: acc.totalLines + (row.totalLines || 0),
         totalCost: acc.totalCost + (row.totalCostUsd || 0),
       }),
-      { commits: 0, aiLines: 0, humanLines: 0, totalLines: 0, totalCost: 0 }
+      { commits: 0, aiLines: 0, humanLines: 0, totalLines: 0, totalCost: 0 },
     );
 
     return c.json({
       email,
       period,
       ...totals,
-      aiPercentage:
-        totals.totalLines > 0
-          ? (totals.aiLines / totals.totalLines) * 100
-          : 0,
+      aiPercentage: totals.totalLines > 0 ? (totals.aiLines / totals.totalLines) * 100 : 0,
       recentCommits: results.slice(0, 20).map((r) => ({
         sha: r.commitSha,
         authoredAt: r.authoredAt,

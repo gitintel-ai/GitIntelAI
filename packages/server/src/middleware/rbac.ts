@@ -1,7 +1,7 @@
-import { Context, Next } from "hono";
+import { and, eq } from "drizzle-orm";
+import type { Context, Next } from "hono";
 import { db } from "../db";
-import { users, organizations } from "../db/schema";
-import { eq, and } from "drizzle-orm";
+import { users } from "../db/schema";
 
 export type Role = "owner" | "admin" | "manager" | "developer" | "viewer";
 
@@ -12,9 +12,7 @@ export interface Permission {
 
 // Role hierarchy and permissions
 const rolePermissions: Record<Role, Permission[]> = {
-  owner: [
-    { resource: "*", action: "manage" },
-  ],
+  owner: [{ resource: "*", action: "manage" }],
   admin: [
     { resource: "organization", action: "manage" },
     { resource: "users", action: "manage" },
@@ -58,11 +56,7 @@ const roleHierarchy: Record<Role, Role[]> = {
 /**
  * Check if a role has a specific permission
  */
-export function hasPermission(
-  role: Role,
-  resource: string,
-  action: Permission["action"]
-): boolean {
+export function hasPermission(role: Role, resource: string, action: Permission["action"]): boolean {
   const permissions = rolePermissions[role];
 
   return permissions.some((p) => {
@@ -106,9 +100,9 @@ export function requireRole(requiredRole: Role) {
       return c.json(
         {
           error: "Forbidden",
-          message: `Role '${requiredRole}' required, but user has '${userRole}'`
+          message: `Role '${requiredRole}' required, but user has '${userRole}'`,
         },
-        403
+        403,
       );
     }
 
@@ -133,9 +127,9 @@ export function requirePermission(resource: string, action: Permission["action"]
       return c.json(
         {
           error: "Forbidden",
-          message: `Permission '${action}' on '${resource}' required`
+          message: `Permission '${action}' on '${resource}' required`,
         },
-        403
+        403,
       );
     }
 
@@ -163,12 +157,7 @@ export function requireOrgMembership() {
     const membership = await db
       .select()
       .from(users)
-      .where(
-        and(
-          eq(users.clerkId, user.id),
-          eq(users.organizationId, orgId)
-        )
-      )
+      .where(and(eq(users.clerkId, user.id), eq(users.organizationId, orgId)))
       .limit(1);
 
     if (membership.length === 0) {
@@ -187,12 +176,12 @@ export function requireOrgMembership() {
  * Resource ownership middleware - checks if user owns or has access to resource
  */
 export function requireResourceAccess(
-  resourceType: "repository" | "attribution" | "api_key",
-  idParam: string = "id"
+  _resourceType: "repository" | "attribution" | "api_key",
+  idParam = "id",
 ) {
   return async (c: Context, next: Next) => {
     const user = c.get("user");
-    const resourceId = c.req.param(idParam);
+    const _resourceId = c.req.param(idParam);
     const userRole = c.get("userRole") as Role;
 
     if (!user) {

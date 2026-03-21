@@ -45,7 +45,7 @@ export function parsePeriod(period: string): number {
   if (!match) throw new Error(`Invalid period format: ${period}`);
 
   const [, value, unit] = match;
-  const num = parseInt(value, 10);
+  const num = Number.parseInt(value, 10);
 
   switch (unit) {
     case "d":
@@ -79,7 +79,7 @@ export function getDateFromPeriod(period: string): Date {
 export function parseLineRanges(lines: string): [number, number][] {
   return lines.split(",").map((part) => {
     const trimmed = part.trim();
-    const [start, end] = trimmed.split("-").map((n) => parseInt(n.trim(), 10));
+    const [start, end] = trimmed.split("-").map((n) => Number.parseInt(n.trim(), 10));
     return end ? [start, end] : [start, start];
   });
 }

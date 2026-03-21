@@ -1,27 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { LoadingCard } from "@/components/loading-card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -31,18 +15,29 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Bell, Plus, Trash2, DollarSign } from "lucide-react";
-import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
-import { EmptyState } from "@/components/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BellOff } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  useBudgetAlerts,
-  useCreateAlert,
-  useUpdateAlert,
-  useDeleteAlert,
-} from "@/lib/hooks";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useBudgetAlerts, useCreateAlert, useDeleteAlert, useUpdateAlert } from "@/lib/hooks";
+import { Bell, DollarSign, Plus, Trash2 } from "lucide-react";
+import { BellOff } from "lucide-react";
+import { useState } from "react";
 
 export default function AlertsPage() {
   const { data, isLoading, isError, error, refetch } = useBudgetAlerts();
@@ -70,7 +65,7 @@ export default function AlertsPage() {
           setNewType("daily");
           setNewThreshold(25);
         },
-      }
+      },
     );
   };
 
@@ -86,16 +81,11 @@ export default function AlertsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Budget Alerts</h1>
-        <p className="text-muted-foreground">
-          Configure spending alerts and notifications
-        </p>
+        <p className="text-muted-foreground">Configure spending alerts and notifications</p>
       </div>
 
       {isError && (
-        <ErrorState
-          message={error?.message || "Failed to load alerts"}
-          onRetry={() => refetch()}
-        />
+        <ErrorState message={error?.message || "Failed to load alerts"} onRetry={() => refetch()} />
       )}
 
       {/* Summary */}
@@ -112,12 +102,8 @@ export default function AlertsPage() {
               <Bell className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {alerts.filter((a) => a.enabled).length}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                of {alerts.length} total
-              </p>
+              <div className="text-2xl font-bold">{alerts.filter((a) => a.enabled).length}</div>
+              <p className="text-xs text-muted-foreground">of {alerts.length} total</p>
             </CardContent>
           </Card>
           <Card>
@@ -160,18 +146,14 @@ export default function AlertsPage() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create Budget Alert</DialogTitle>
-                <DialogDescription>
-                  Configure a new spending threshold alert
-                </DialogDescription>
+                <DialogDescription>Configure a new spending threshold alert</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
                   <Label>Period</Label>
                   <Select
                     value={newType}
-                    onValueChange={(v: "daily" | "weekly" | "monthly") =>
-                      setNewType(v)
-                    }
+                    onValueChange={(v: "daily" | "weekly" | "monthly") => setNewType(v)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -191,19 +173,14 @@ export default function AlertsPage() {
                       id="threshold"
                       type="number"
                       value={newThreshold}
-                      onChange={(e) =>
-                        setNewThreshold(Number.parseFloat(e.target.value))
-                      }
+                      onChange={(e) => setNewThreshold(Number.parseFloat(e.target.value))}
                       className="pl-10"
                     />
                   </div>
                 </div>
               </div>
               <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowNewAlert(false)}
-                >
+                <Button variant="outline" onClick={() => setShowNewAlert(false)}>
                   Cancel
                 </Button>
                 <Button
@@ -245,9 +222,7 @@ export default function AlertsPage() {
                     <TableCell>
                       <Switch
                         checked={alert.enabled}
-                        onCheckedChange={() =>
-                          handleToggle(alert.id, alert.enabled)
-                        }
+                        onCheckedChange={() => handleToggle(alert.id, alert.enabled)}
                         disabled={updateAlert.isPending}
                       />
                     </TableCell>

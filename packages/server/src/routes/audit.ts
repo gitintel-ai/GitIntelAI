@@ -1,9 +1,9 @@
+import { randomUUID } from "node:crypto";
+import { and, desc, eq, gte, lte, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
-import { auditLogs, users } from "../db/schema";
-import { eq, desc, and, gte, lte, like, sql } from "drizzle-orm";
+import { auditLogs } from "../db/schema";
 import { requirePermission } from "../middleware/rbac";
-import { randomUUID } from "crypto";
 
 const app = new Hono();
 
@@ -47,7 +47,7 @@ export interface AuditLogEntry {
  * Create an audit log entry
  */
 export async function createAuditLog(
-  entry: Omit<AuditLogEntry, "id" | "createdAt">
+  entry: Omit<AuditLogEntry, "id" | "createdAt">,
 ): Promise<void> {
   await db.insert(auditLogs).values({
     id: randomUUID(),
@@ -64,8 +64,8 @@ app.get("/", requirePermission("audit_logs", "read"), async (c) => {
   const orgId = c.get("orgId");
 
   // Query params
-  const page = parseInt(c.req.query("page") || "1");
-  const limit = Math.min(parseInt(c.req.query("limit") || "50"), 100);
+  const page = Number.parseInt(c.req.query("page") || "1");
+  const limit = Math.min(Number.parseInt(c.req.query("limit") || "50"), 100);
   const offset = (page - 1) * limit;
 
   const action = c.req.query("action");
@@ -73,7 +73,7 @@ app.get("/", requirePermission("audit_logs", "read"), async (c) => {
   const resourceType = c.req.query("resourceType");
   const startDate = c.req.query("startDate");
   const endDate = c.req.query("endDate");
-  const search = c.req.query("search");
+  const _search = c.req.query("search");
 
   // Build conditions
   const conditions = [eq(auditLogs.organizationId, orgId)];
@@ -188,12 +188,7 @@ app.get("/summary/stats", requirePermission("audit_logs", "read"), async (c) => 
       count: sql<number>`count(*)`,
     })
     .from(auditLogs)
-    .where(
-      and(
-        eq(auditLogs.organizationId, orgId),
-        gte(auditLogs.createdAt, startDate)
-      )
-    )
+    .where(and(eq(auditLogs.organizationId, orgId), gte(auditLogs.createdAt, startDate)))
     .groupBy(auditLogs.action)
     .orderBy(desc(sql`count(*)`));
 
@@ -204,12 +199,7 @@ app.get("/summary/stats", requirePermission("audit_logs", "read"), async (c) => 
       count: sql<number>`count(*)`,
     })
     .from(auditLogs)
-    .where(
-      and(
-        eq(auditLogs.organizationId, orgId),
-        gte(auditLogs.createdAt, startDate)
-      )
-    )
+    .where(and(eq(auditLogs.organizationId, orgId), gte(auditLogs.createdAt, startDate)))
     .groupBy(sql`DATE(${auditLogs.createdAt})`)
     .orderBy(sql`DATE(${auditLogs.createdAt})`);
 
@@ -220,12 +210,7 @@ app.get("/summary/stats", requirePermission("audit_logs", "read"), async (c) => 
       count: sql<number>`count(*)`,
     })
     .from(auditLogs)
-    .where(
-      and(
-        eq(auditLogs.organizationId, orgId),
-        gte(auditLogs.createdAt, startDate)
-      )
-    )
+    .where(and(eq(auditLogs.organizationId, orgId), gte(auditLogs.createdAt, startDate)))
     .groupBy(auditLogs.userId)
     .orderBy(desc(sql`count(*)`))
     .limit(10);
@@ -246,8 +231,8 @@ app.get("/summary/stats", requirePermission("audit_logs", "read"), async (c) => 
       and(
         eq(auditLogs.organizationId, orgId),
         gte(auditLogs.createdAt, startDate),
-        sql`${auditLogs.action} IN ${securityActions}`
-      )
+        sql`${auditLogs.action} IN ${securityActions}`,
+      ),
     );
 
   return c.json({
@@ -330,9 +315,7 @@ app.get("/export/csv", requirePermission("audit_logs", "read"), async (c) => {
 
   const csv = [
     headers.join(","),
-    ...rows.map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
-    ),
+    ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")),
   ].join("\n");
 
   return new Response(csv, {

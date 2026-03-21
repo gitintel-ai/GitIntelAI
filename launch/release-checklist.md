@@ -67,17 +67,11 @@
    - **Risk:** Medium — MITM or corrupted downloads go undetected.
    - **Recommendation:** Add optional checksum verification in a future release.
 
-5. **install.sh uses `gitintel.com` domain, install.ps1 uses `gitintel.ai` domain.** Inconsistent URLs:
-   - install.sh line 7: `https://gitintel.com/install`
-   - install.ps1 line 5: `https://gitintel.ai/install.ps1`
-   - npm package.json homepage: `https://gitintel.com`
-   - Homebrew formula homepage: `https://gitintel.ai`
-   - **Action:** Decide on canonical domain and make consistent.
+5. ~~**install.sh uses `gitintel.com` domain, install.ps1 uses `gitintel.ai` domain.**~~ **FIXED** — Standardized all references to `gitintel.com`.
 
-6. **Cargo.toml `repository` field points to wrong URL.** Line 8: `https://github.com/gitintel-ai/gitintel` (lowercase, no "AI"). Actual repo is `gitintel-ai/GitIntelAI`.
-   - **Fix:** Update to `https://github.com/gitintel-ai/GitIntelAI`
+6. ~~**Cargo.toml `repository` field points to wrong URL.**~~ **FIXED** — Updated to `https://github.com/gitintel-ai/GitIntelAI`.
 
-7. **npm bin wrapper `gitintel.js` error message references wrong URL.** Line 14: `https://github.com/gitintel-ai/gitintel` (lowercase). Should be `gitintel-ai/GitIntelAI`.
+7. ~~**npm bin wrapper `gitintel.js` error message references wrong URL.**~~ **FIXED** — Updated to `https://github.com/gitintel-ai/GitIntelAI`.
 
 ---
 
@@ -137,9 +131,9 @@
 ## 7. Pre-Tag Steps (Do These Before `git tag v0.1.0`)
 
 ### Code fixes
-- [ ] Fix Cargo.toml `repository` URL: change to `https://github.com/gitintel-ai/GitIntelAI`
-- [ ] Fix `bin/gitintel.js` error URL: change to `https://github.com/gitintel-ai/GitIntelAI`
-- [ ] Standardize domain: pick `gitintel.ai` or `gitintel.com` and update all references
+- [x] Fix Cargo.toml `repository` URL: change to `https://github.com/gitintel-ai/GitIntelAI`
+- [x] Fix `bin/gitintel.js` error URL: change to `https://github.com/gitintel-ai/GitIntelAI`
+- [x] Standardize domain: `gitintel.com` — all references updated
 
 ### Infrastructure
 - [ ] Create npm org `@gitintel` and generate automation token

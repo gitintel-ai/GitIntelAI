@@ -49,7 +49,7 @@ impl Default for Config {
             prompt_storage: "local".to_string(),
             cloud_sync: CloudSyncConfig {
                 enabled: false,
-                endpoint: "https://app.gitintel.ai/api/v1".to_string(),
+                endpoint: "https://app.gitintel.com/api/v1".to_string(),
                 api_key: String::new(),
             },
             otel: OtelConfig {

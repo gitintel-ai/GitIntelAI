@@ -8,7 +8,7 @@
 - [ ] Record 2-minute terminal demo GIF (init, scan, blame, stats, cost)
 - [ ] Verify `gitintel scan` works on 5 popular open-source repos (Next.js, LangChain, Astro, Hono, Polars)
 - [ ] Set up GitHub repo metadata: description, topics, social preview image
-- [ ] Create gitintel.ai landing page (or ensure GitHub README is strong enough to stand alone)
+- [ ] Create gitintel.com landing page (or ensure GitHub README is strong enough to stand alone)
 - [ ] Pre-build binaries for Linux x86_64, macOS arm64, macOS x86_64, Windows x86_64
 
 ## Day -5 (Thursday): Content Prep

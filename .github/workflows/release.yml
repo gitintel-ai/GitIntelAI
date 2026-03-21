@@ -147,7 +147,7 @@ jobs:
           eval "$(ssh-agent -s)"
           echo "$TAP_DEPLOY_KEY" | ssh-add -
 
-          git config --global user.email "ci@gitintel.ai"
+          git config --global user.email "ci@gitintel.com"
           git config --global user.name "GitIntel CI"
 
           git clone git@github.com:gitintel-ai/homebrew-tap.git /tmp/homebrew-tap

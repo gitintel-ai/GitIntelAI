@@ -110,12 +110,12 @@ export default function PrivacyPage() {
           exactly what data is collected and how it is stored by reading the
           source code at{" "}
           <a
-            href="https://github.com/gitintel-ai/gitintel"
+            href="https://github.com/gitintel-ai/GitIntelAI"
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-foreground"
           >
-            github.com/gitintel-ai/gitintel
+            github.com/gitintel-ai/GitIntelAI
           </a>
           . The SQLite schema is documented in{" "}
           <code className="rounded bg-muted px-1 py-0.5 text-xs">

@@ -89,8 +89,8 @@ Rust is only needed to build from source. Pre-built binaries (coming soon) will 
 
 ```bash
 # Clone the repository
-git clone https://github.com/gitintel-ai/gitintel.git
-cd gitintel
+git clone https://github.com/gitintel-ai/GitIntelAI.git
+cd GitIntelAI
 
 # Build the CLI (release mode — ~22 MB binary, <50ms startup)
 cargo build --release --manifest-path packages/cli/Cargo.toml

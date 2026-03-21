@@ -10,7 +10,7 @@
 
 class Gitintel < Formula
   desc "Git-native AI adoption tracking, cost intelligence & context optimization"
-  homepage "https://gitintel.ai"
+  homepage "https://gitintel.com"
   version "0.1.0"
   license "MIT"
 
@@ -51,7 +51,7 @@ class Gitintel < Formula
         export CLAUDE_CODE_ENABLE_TELEMETRY=1
         export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 
-      Documentation: https://gitintel.ai/docs/getting-started
+      Documentation: https://gitintel.com/docs/getting-started
     EOS
   end
 

@@ -23,4 +23,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enterprise features: SAML/OIDC SSO, SCIM 2.0, RBAC, audit logging
 - Docker Compose and Kubernetes (Helm) deployment support
 
-[0.1.0-beta]: https://github.com/gitintel-ai/gitintel/releases/tag/v0.1.0-beta
+[0.1.0-beta]: https://github.com/gitintel-ai/GitIntelAI/releases/tag/v0.1.0-beta

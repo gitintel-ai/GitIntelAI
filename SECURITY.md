@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-Email **security@gitintel.ai** with:
+Email **security@gitintel.com** with:
 
 - Description of the vulnerability
 - Steps to reproduce

@@ -31,12 +31,12 @@ export default function TermsPage() {
             subject to the terms of that license. The full license text is
             available in the repository at{" "}
             <a
-              href="https://github.com/gitintel-ai/gitintel/blob/main/LICENSE"
+              href="https://github.com/gitintel-ai/GitIntelAI/blob/main/LICENSE"
               target="_blank"
               rel="noopener noreferrer"
               className="underline hover:text-foreground"
             >
-              github.com/gitintel-ai/gitintel
+              github.com/gitintel-ai/GitIntelAI
             </a>
             .
           </p>

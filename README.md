@@ -1,6 +1,6 @@
 # GitIntel
 
-[![CI](https://github.com/gitintel-ai/gitintel/actions/workflows/ci.yml/badge.svg)](https://github.com/gitintel-ai/gitintel/actions)
+[![CI](https://github.com/gitintel-ai/GitIntelAI/actions/workflows/ci.yml/badge.svg)](https://github.com/gitintel-ai/GitIntelAI/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-0.1.0--beta-blue)](packages/cli/Cargo.toml)
 [![Rust](https://img.shields.io/badge/built%20with-Rust-orange)](https://www.rust-lang.org)
@@ -24,13 +24,13 @@ GitIntel answers all three. Zero workflow change. 100% local.
 
 ```bash
 # macOS / Linux
-curl -fsSL https://gitintel.ai/install | sh
+curl -fsSL https://gitintel.com/install | sh
 
 # Homebrew
 brew install gitintel-ai/tap/gitintel
 
 # Windows (PowerShell)
-irm https://gitintel.ai/install.ps1 | iex
+irm https://gitintel.com/install.ps1 | iex
 
 # npm (any platform)
 npx @gitintel/cli
@@ -40,7 +40,7 @@ npx @gitintel/cli
 <summary>Build from source</summary>
 
 ```bash
-git clone https://github.com/gitintel-ai/gitintel.git && cd gitintel
+git clone https://github.com/gitintel-ai/GitIntelAI.git && cd GitIntelAI
 cargo build --release --manifest-path packages/cli/Cargo.toml
 cp packages/cli/target/release/gitintel ~/.local/bin/
 ```
@@ -176,7 +176,7 @@ GitIntel ships with enterprise features from day one: self-hosted deployment via
 - [ ] Homebrew tap
 - [ ] Automatic attribution (no manual checkpoint)
 - [ ] VS Code extension for Copilot
-- [ ] Hosted SaaS at app.gitintel.ai
+- [ ] Hosted SaaS at app.gitintel.com
 - [ ] PR cost annotations (GitHub App, GitLab)
 - [ ] Budget forecasting and anomaly detection
 - [ ] MCP server for agent-readable attribution
@@ -192,7 +192,7 @@ MIT -- see [LICENSE](LICENSE).
 ---
 
 <p align="center">
-  <a href="https://gitintel.ai">gitintel.ai</a> &middot;
+  <a href="https://gitintel.com">gitintel.com</a> &middot;
   <a href="docs/">Docs</a> &middot;
-  <a href="https://github.com/gitintel-ai/gitintel/issues">Issues</a>
+  <a href="https://github.com/gitintel-ai/GitIntelAI/issues">Issues</a>
 </p>

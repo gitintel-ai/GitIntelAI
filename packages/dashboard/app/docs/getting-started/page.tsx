@@ -103,7 +103,7 @@ export default function GettingStartedPage() {
           <summary className="cursor-pointer px-4 py-3 text-sm font-medium">Windows (direct download)</summary>
           <div className="border-t px-4 py-3 font-mono text-xs space-y-1">
             <p className="text-muted-foreground"># Download gitintel-windows-amd64.exe from:</p>
-            <p>https://github.com/gitintel-ai/gitintel/releases/latest</p>
+            <p>https://github.com/gitintel-ai/GitIntelAI/releases/latest</p>
             <br />
             <p className="text-muted-foreground"># Copy to PATH (PowerShell)</p>
             <p>{"Copy-Item gitintel-windows-amd64.exe \"$env:USERPROFILE\\.local\\bin\\gitintel.exe\""}</p>
@@ -112,7 +112,7 @@ export default function GettingStartedPage() {
         <details className="rounded-lg border">
           <summary className="cursor-pointer px-4 py-3 text-sm font-medium">Build from source (requires Rust 1.82+)</summary>
           <div className="border-t px-4 py-3 font-mono text-xs space-y-1">
-            <p>git clone https://github.com/gitintel-ai/gitintel.git</p>
+            <p>git clone https://github.com/gitintel-ai/GitIntelAI.git</p>
             <p>cd gitintel</p>
             <p>cargo build --release --manifest-path packages/cli/Cargo.toml</p>
             <p>cp packages/cli/target/release/gitintel ~/.local/bin/</p>

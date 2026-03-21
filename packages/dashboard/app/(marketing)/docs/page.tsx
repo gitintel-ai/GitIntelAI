@@ -35,12 +35,12 @@ const sections = [
       { label: "Installation", href: "/install" as Route },
       {
         label: "GETTING_STARTED.md on GitHub",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md",
         external: true,
       },
       {
         label: "Quick Start",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/QUICKSTART.md",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/QUICKSTART.md",
         external: true,
       },
     ],
@@ -53,27 +53,27 @@ const sections = [
     links: [
       {
         label: "gitintel init",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#step-1-initialize",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#step-1-initialize",
         external: true,
       },
       {
         label: "gitintel checkpoint",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#recording-ai-sessions",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#recording-ai-sessions",
         external: true,
       },
       {
         label: "gitintel blame",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#viewing-attribution",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#viewing-attribution",
         external: true,
       },
       {
         label: "gitintel stats",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#viewing-stats",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#viewing-stats",
         external: true,
       },
       {
         label: "gitintel cost",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#cost-tracking",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#cost-tracking",
         external: true,
       },
     ],
@@ -86,17 +86,17 @@ const sections = [
     links: [
       {
         label: "gitintel context init",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#context-management",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#context-management",
         external: true,
       },
       {
         label: "gitintel context optimize",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#context-optimization",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#context-optimization",
         external: true,
       },
       {
         label: "gitintel memory",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#memory-management",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#memory-management",
         external: true,
       },
     ],
@@ -109,12 +109,12 @@ const sections = [
     links: [
       {
         label: "OTel Setup (Claude Code)",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#otel-setup",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#otel-setup",
         external: true,
       },
       {
         label: "Model Pricing Table",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/packages/core/src/constants.ts",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/packages/core/src/constants.ts",
         external: true,
       },
     ],
@@ -127,12 +127,12 @@ const sections = [
     links: [
       {
         label: "Standard Specification",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/specs/02-attribution-std.md",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/specs/02-attribution-std.md",
         external: true,
       },
       {
         label: "Schema Reference (YAML)",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/packages/cli/src/hooks/post_commit.rs",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/packages/cli/src/hooks/post_commit.rs",
         external: true,
       },
     ],
@@ -145,12 +145,12 @@ const sections = [
     links: [
       {
         label: "Config Reference",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md#configuration",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md#configuration",
         external: true,
       },
       {
         label: "Self-Hosting (Docker)",
-        href: "https://github.com/gitintel-ai/gitintel/blob/main/infra/docker",
+        href: "https://github.com/gitintel-ai/GitIntelAI/blob/main/infra/docker",
         external: true,
       },
     ],
@@ -180,7 +180,7 @@ export default function DocsPage() {
             <ArrowRight className="h-4 w-4" />
           </Link>
           <a
-            href="https://github.com/gitintel-ai/gitintel"
+            href="https://github.com/gitintel-ai/GitIntelAI"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
@@ -291,7 +291,7 @@ export default function DocsPage() {
           examples.
         </p>
         <a
-          href="https://github.com/gitintel-ai/gitintel/blob/main/GETTING_STARTED.md"
+          href="https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"

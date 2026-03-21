@@ -2,7 +2,7 @@
 # https://github.com/gitintel-ai/GitIntelAI
 #
 # Usage:
-#   irm https://gitintel.ai/install.ps1 | iex
+#   irm https://gitintel.com/install.ps1 | iex
 #   irm https://raw.githubusercontent.com/gitintel-ai/GitIntelAI/main/install.ps1 | iex
 #
 # Options (env vars):
@@ -81,5 +81,5 @@ if ($UserPath -notlike "*$InstallDir*") {
 Write-Host ""
 Write-Host "  Run 'gitintel --version' to verify."
 Write-Host "  Run 'gitintel init' inside a git repo to get started."
-Write-Host "  Docs: https://gitintel.ai/docs/getting-started"
+Write-Host "  Docs: https://gitintel.com/docs/getting-started"
 Write-Host ""

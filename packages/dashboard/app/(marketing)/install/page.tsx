@@ -90,7 +90,7 @@ export default function InstallPage() {
           <CodeBlock>
             <p>
               <span className="text-green-400">$</span> git clone
-              https://github.com/gitintel-ai/gitintel.git
+              https://github.com/gitintel-ai/GitIntelAI.git
             </p>
             <p>
               <span className="text-green-400">$</span> cd gitintel

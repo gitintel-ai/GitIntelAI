@@ -28,7 +28,7 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported to **conduct@gitintel.ai**.
+Instances of unacceptable behavior may be reported to **conduct@gitintel.com**.
 All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution

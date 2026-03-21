@@ -262,7 +262,8 @@ fn print_text_summary(summary: &ScanSummary) {
     println!();
     println!(
         "{}",
-        format!("Results stored in local database. Run 'gitintel stats' for deeper analysis.")
+        "Results stored in local database. Run 'gitintel stats' for deeper analysis."
+            .to_string()
             .dimmed()
     );
 }

@@ -32,12 +32,12 @@ pub async fn run(input: &str) -> Result<()> {
     let mut section_tokens = Vec::new();
 
     for line in content.lines() {
-        if line.starts_with("## ") {
+        if let Some(name) = line.strip_prefix("## ") {
             if in_section && !current_section.is_empty() {
                 let tokens = token_counter::count_tokens(&current_content)?;
                 section_tokens.push((current_section.clone(), tokens));
             }
-            current_section = line[3..].trim().to_string();
+            current_section = name.trim().to_string();
             current_content = format!("{}\n", line);
             in_section = true;
         } else if in_section {

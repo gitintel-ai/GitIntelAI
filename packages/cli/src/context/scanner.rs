@@ -196,14 +196,12 @@ fn scan_directory_structure(path: &Path, info: &mut ProjectInfo) -> Result<()> {
         "main.rs", "index.ts", "index.js", "main.py", "main.go", "app.ts",
     ];
     for pattern in entry_patterns {
-        for entry in WalkDir::new(path).max_depth(3) {
-            if let Ok(e) = entry {
-                if e.file_name().to_string_lossy() == pattern {
-                    let rel_path = e.path().strip_prefix(path).unwrap_or(e.path());
-                    info.structure
-                        .entry_points
-                        .push(rel_path.to_string_lossy().to_string());
-                }
+        for e in WalkDir::new(path).max_depth(3).into_iter().flatten() {
+            if e.file_name().to_string_lossy() == pattern {
+                let rel_path = e.path().strip_prefix(path).unwrap_or(e.path());
+                info.structure
+                    .entry_points
+                    .push(rel_path.to_string_lossy().to_string());
             }
         }
     }

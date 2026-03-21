@@ -145,7 +145,7 @@ fn parse_sections(content: &str) -> Result<Vec<Section>> {
     let mut in_section = false;
 
     for line in content.lines() {
-        if line.starts_with("## ") {
+        if let Some(name) = line.strip_prefix("## ") {
             // Save previous section
             if in_section && !current_name.is_empty() {
                 let tokens = token_counter::count_tokens(&current_content)?;
@@ -158,7 +158,7 @@ fn parse_sections(content: &str) -> Result<Vec<Section>> {
             }
 
             // Start new section
-            current_name = line[3..].trim().to_string();
+            current_name = name.trim().to_string();
             current_content = format!("{}\n", line);
             in_section = true;
         } else if in_section {
@@ -181,7 +181,7 @@ fn parse_sections(content: &str) -> Result<Vec<Section>> {
     Ok(sections)
 }
 
-fn score_sections(sections: &mut Vec<Section>) -> Result<()> {
+fn score_sections(sections: &mut [Section]) -> Result<()> {
     // In production, this would analyze session transcripts to determine
     // which sections are actually referenced by the AI.
     //
@@ -245,8 +245,8 @@ fn apply_optimizations(content: &str, sections: &[Section]) -> Result<String> {
     let mut skip_lines = false;
 
     for line in content.lines() {
-        if line.starts_with("## ") {
-            let name = line[3..].trim();
+        if let Some(stripped) = line.strip_prefix("## ") {
+            let name = stripped.trim();
             current_section = sections.iter().find(|s| s.name == name);
 
             if let Some(section) = current_section {

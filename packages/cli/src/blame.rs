@@ -148,13 +148,13 @@ fn parse_porcelain_blame(output: &str) -> Result<Vec<BlameLine>> {
     let mut current_line_num = 0;
 
     for line in output.lines() {
-        if line.starts_with('\t') {
+        if let Some(content) = line.strip_prefix('\t') {
             // This is the actual content line
             lines.push(BlameLine {
                 commit_sha: current_sha.clone(),
                 author: current_author.clone(),
                 line_number: current_line_num,
-                content: line[1..].to_string(),
+                content: content.to_string(),
                 attribution: LineAttribution::Unknown,
             });
         } else if line.len() >= 40 && line.chars().take(40).all(|c| c.is_ascii_hexdigit()) {

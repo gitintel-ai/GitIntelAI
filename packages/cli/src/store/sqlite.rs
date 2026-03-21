@@ -75,6 +75,7 @@ pub struct ScannedAttribution {
 }
 
 /// Aggregated scan statistics per agent
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ScannedAgentStats {
     pub agent: String,
@@ -451,6 +452,7 @@ impl Database {
     }
 
     /// Get all scanned attributions
+    #[allow(dead_code)]
     pub fn get_scanned_attributions(&self) -> Result<Vec<ScannedAttribution>> {
         let mut stmt = self.conn.prepare(
             "SELECT commit_sha, agent, confidence, insertions, deletions, files_changed, scanned_at FROM scanned_attributions ORDER BY scanned_at DESC",
@@ -464,6 +466,7 @@ impl Database {
     }
 
     /// Get a scanned attribution by commit SHA
+    #[allow(dead_code)]
     pub fn get_scanned_attribution(&self, commit_sha: &str) -> Result<Option<ScannedAttribution>> {
         let mut stmt = self.conn.prepare(
             "SELECT commit_sha, agent, confidence, insertions, deletions, files_changed, scanned_at FROM scanned_attributions WHERE commit_sha = ?1",
@@ -477,6 +480,7 @@ impl Database {
     }
 
     /// Get scanned attributions that do NOT exist in the attributions table
+    #[allow(dead_code)]
     pub fn get_scanned_only_attributions(&self) -> Result<Vec<ScannedAttribution>> {
         let mut stmt = self.conn.prepare(
             r#"
@@ -496,6 +500,7 @@ impl Database {
     }
 
     /// Get aggregated scan statistics grouped by agent
+    #[allow(dead_code)]
     pub fn get_scanned_stats(&self) -> Result<Vec<ScannedAgentStats>> {
         let mut stmt = self.conn.prepare(
             r#"
@@ -531,6 +536,7 @@ impl Database {
     // ==================== Cost Session Operations ====================
 
     /// Insert or update a cost session
+    #[allow(dead_code)]
     pub fn upsert_cost_session(&self, session: &CostSession) -> Result<()> {
         self.conn.execute(
             r#"
@@ -716,6 +722,7 @@ impl Database {
     }
 
     /// Delete a memory entry
+    #[allow(dead_code)]
     pub fn delete_memory(&self, key: &str) -> Result<bool> {
         let deleted = self
             .conn
@@ -726,6 +733,7 @@ impl Database {
     // ==================== Sync Operations ====================
 
     /// Get the last sync timestamp
+    #[allow(dead_code)]
     pub fn get_last_sync_time(&self) -> Result<Option<DateTime<Utc>>> {
         let mut stmt = self
             .conn
@@ -745,6 +753,7 @@ impl Database {
     }
 
     /// Set the last sync timestamp
+    #[allow(dead_code)]
     pub fn set_last_sync_time(&self, time: DateTime<Utc>) -> Result<()> {
         self.conn.execute(
             "INSERT OR REPLACE INTO sync_metadata (key, value) VALUES ('last_sync_time', ?1)",
@@ -754,6 +763,7 @@ impl Database {
     }
 
     /// Link a cost session to a git commit SHA
+    #[allow(dead_code)]
     pub fn link_session_to_commit(&self, session_id: &str, commit_sha: &str) -> Result<()> {
         self.conn.execute(
             "UPDATE cost_sessions SET commit_sha = ?1, ended_at = ?2 WHERE session_id = ?3",
@@ -763,6 +773,7 @@ impl Database {
     }
 
     /// Get cost sessions since a timestamp
+    #[allow(dead_code)]
     pub fn get_cost_sessions_since(&self, since: DateTime<Utc>) -> Result<Vec<CostSession>> {
         let mut stmt = self.conn.prepare(
             "SELECT * FROM cost_sessions WHERE started_at >= ?1 ORDER BY started_at ASC",

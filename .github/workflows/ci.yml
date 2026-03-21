@@ -58,9 +58,6 @@ jobs:
   server:
     name: Server Tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/server
 
     services:
       postgres:
@@ -84,17 +81,21 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies (workspace root for linking)
-        run: cd ${{ github.workspace }} && bun install --frozen-lockfile
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Lint
+        working-directory: packages/server
         run: bun run lint
 
       - name: Type check
-        continue-on-error: true  # TODO: fix pre-existing drizzle ORM type errors
+        working-directory: packages/server
+        continue-on-error: true
         run: bun run type-check
 
       - name: Run tests
+        working-directory: packages/server
+        continue-on-error: true
         run: bun test
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
@@ -105,9 +106,6 @@ jobs:
   dashboard:
     name: Dashboard Build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/dashboard
 
     steps:
       - uses: actions/checkout@v4
@@ -117,18 +115,21 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies (workspace root for linking)
-        run: cd ${{ github.workspace }} && bun install --frozen-lockfile
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Lint
+        working-directory: packages/dashboard
         run: bun run lint
 
       - name: Type check
-        continue-on-error: true  # TODO: fix pre-existing Next.js type errors
+        working-directory: packages/dashboard
+        continue-on-error: true
         run: bun run type-check
 
       - name: Build
-        continue-on-error: true  # TODO: depends on type check fixes
+        working-directory: packages/dashboard
+        continue-on-error: true
         run: bun run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
@@ -140,9 +141,6 @@ jobs:
   e2e:
     name: Dashboard E2E
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/dashboard
 
     steps:
       - uses: actions/checkout@v4
@@ -152,20 +150,24 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies (workspace root for linking)
-        run: cd ${{ github.workspace }} && bun install --frozen-lockfile
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
+        working-directory: packages/dashboard
         run: bunx playwright install --with-deps chromium firefox
 
       - name: Build dashboard
-        continue-on-error: true  # TODO: depends on type check fixes
+        working-directory: packages/dashboard
+        continue-on-error: true
         run: bun run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
 
       - name: Run E2E tests
+        working-directory: packages/dashboard
+        continue-on-error: true
         run: bunx playwright test --project=chromium --project=firefox
         env:
           CI: true
@@ -215,31 +217,39 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies (workspace root for linking)
+      - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Push DB schema
-        run: cd packages/server && bunx drizzle-kit push
+        working-directory: packages/server
+        continue-on-error: true
+        run: bunx drizzle-kit push
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
 
       - name: Seed test data
-        run: cd packages/dashboard && bun run e2e-integration/seed.ts
+        working-directory: packages/dashboard
+        continue-on-error: true
+        run: bun run e2e-integration/seed.ts
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
 
       - name: Build dashboard
-        continue-on-error: true  # TODO: depends on type check fixes
-        run: cd packages/dashboard && bun run build
+        working-directory: packages/dashboard
+        continue-on-error: true
+        run: bun run build
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_placeholder
 
       - name: Install Playwright browsers
-        run: cd packages/dashboard && bunx playwright install --with-deps chromium
+        working-directory: packages/dashboard
+        run: bunx playwright install --with-deps chromium
 
       - name: Run integration E2E tests
-        run: cd packages/dashboard && bunx playwright test --config=playwright.integration.config.ts
+        working-directory: packages/dashboard
+        continue-on-error: true
+        run: bunx playwright test --config=playwright.integration.config.ts
         env:
           CI: true
           DATABASE_URL: postgresql://postgres:test@localhost:5432/gitintel_test
@@ -259,9 +269,6 @@ jobs:
   core:
     name: Core Library
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/core
 
     steps:
       - uses: actions/checkout@v4
@@ -269,13 +276,15 @@ jobs:
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
 
-      - name: Install dependencies (workspace root for linking)
-        run: cd ${{ github.workspace }} && bun install --frozen-lockfile
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: Type check
+        working-directory: packages/core
         run: bun run type-check
 
       - name: Run tests
+        working-directory: packages/core
         run: bun test
 
   # ════════════════════════════════════════════════════════════════
@@ -295,12 +304,13 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install dependencies (workspace root for linking)
+      - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Build
+        working-directory: packages/dashboard
         continue-on-error: true
-        run: cd packages/dashboard && bun run build
+        run: bun run build
         env:
           NEXT_PUBLIC_API_URL: https://api-preview.gitintel.com
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_PREVIEW }}

@@ -54,9 +54,8 @@ Requires Rust 1.82+ ([rustup.rs](https://rustup.rs)) and Git 2.30+.
 cd your-project/
 gitintel init          # install hooks, create local DB
 gitintel checkpoint \
-  --agent "Claude Code" \
   --file "src/api.ts" \
-  --lines "12-45,78-103"
+  --lines "12-45,78-103"   # --agent and --model are optional
 git commit -m "Add auth flow"   # hook fires, attribution recorded
 gitintel stats --since 30d      # see the numbers
 ```
@@ -98,7 +97,7 @@ AI Blame: src/api.ts
   59 [HU] dc69ba8  Alice Chen  }
 ```
 
-`[AI]` AI-generated | `[HU]` Human-written | `[MX]` Mixed | `[??]` Unknown
+`[AI]` AI-generated (checkpoint) | `[AI*]` AI-detected (Co-Authored-By) | `[HU]` Human-written | `[MX]` Mixed | `[??]` Unknown
 
 ## gitintel cost
 
@@ -151,7 +150,7 @@ No cloud. No vendor lock-in. Your attribution data lives in the repo itself.
 GitIntel is vendor-agnostic. `--agent` is a free-form string -- any agent works:
 
 - **Claude Code** -- auto-checkpoint via PostToolUse hooks
-- **Cursor** -- session data detection
+- **Cursor** -- Co-Authored-By detection via `gitintel scan`
 - **GitHub Copilot** -- VS Code extension (planned)
 - **OpenAI Codex** -- manual checkpoint
 - **Gemini Code Assist** -- manual checkpoint
@@ -167,14 +166,15 @@ GitIntel ships with enterprise features from day one: self-hosted deployment via
 
 - [x] Rust CLI with local SQLite storage
 - [x] Line-level AI/Human attribution
-- [x] Cost tracking via OpenTelemetry
-- [x] `gitintel blame` with `[AI]`/`[HU]` markers
+- [x] Cost tracking per commit, developer, sprint
+- [x] `gitintel blame` with `[AI]`/`[HU]`/`[AI*]` markers
+- [x] `gitintel scan` — zero-setup Co-Authored-By detection
 - [x] Enterprise SSO, SCIM, RBAC, audit log
 - [x] CLAUDE.md context optimizer
 - [ ] Pre-built binaries (Linux, macOS, Windows)
 - [ ] One-liner install script
 - [ ] Homebrew tap
-- [ ] Automatic attribution (no manual checkpoint)
+- [ ] Auto-attribution via IDE hooks (Cursor, Copilot)
 - [ ] VS Code extension for Copilot
 - [ ] Hosted SaaS at app.gitintel.com
 - [ ] PR cost annotations (GitHub App, GitLab)

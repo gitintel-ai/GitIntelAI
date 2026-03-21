@@ -16,10 +16,16 @@ Reverse-engineer and supersede usegitai.com by building a fully open, enterprise
 ```
 gitintel/
 ├── CLAUDE.md                  ← YOU ARE HERE (always load this first)
-├── PRD.md                     ← Full product requirements
-├── ARCHITECTURE.md            ← System design decisions
-├── AGENTS.md                  ← Multi-agent orchestration plan
-├── TASKS.md                   ← Sprint-level task list for agents
+├── docs/
+│   ├── ARCHITECTURE.md        ← System design decisions
+│   ├── GETTING_STARTED.md     ← User-facing getting started guide
+│   ├── QUICKSTART.md          ← Quick start guide
+│   ├── REAL_CLI_EXAMPLES.md   ← Verified CLI output examples
+│   └── internal/
+│       ├── PRD.md             ← Full product requirements
+│       ├── AGENTS.md          ← Multi-agent orchestration plan
+│       ├── TASKS.md           ← Sprint-level task list for agents
+│       └── ...                ← Other internal docs
 ├── specs/
 │   ├── 01-cli-core.md         ← CLI git proxy + hook system
 │   ├── 02-attribution-std.md  ← Authorship log open standard
@@ -97,13 +103,13 @@ summary:
 ```
 
 ## Agent Orchestration Instructions
-When Opus orchestrates sub-agents, use TASKS.md as the source of truth.
+When Opus orchestrates sub-agents, use docs/internal/TASKS.md as the source of truth.
 Each agent MUST:
 1. Read this CLAUDE.md first
 2. Read the relevant spec file(s) for their task
 3. Write code in the correct package directory
 4. Add tests alongside code
-5. Update TASKS.md status on completion
+5. Update docs/internal/TASKS.md status on completion
 6. Never skip error handling, never hardcode secrets
 
 ## Definition of Done
@@ -112,4 +118,4 @@ A feature is DONE when:
 - [ ] Integration test exists
 - [ ] CLI `--help` updated
 - [ ] README section updated
-- [ ] TASKS.md status = `✅ Done`
+- [ ] docs/internal/TASKS.md status = `✅ Done`

@@ -12,11 +12,14 @@ mod cost;
 mod error;
 mod hooks;
 mod init;
+mod known_agents;
 mod otel;
 mod proxy;
+mod scan;
 mod stats;
 mod store;
 mod sync;
+mod trailer_detection;
 mod update;
 
 use clap::{Parser, Subcommand};
@@ -180,6 +183,25 @@ enum Commands {
         /// Set a configuration value
         #[arg(long)]
         set: Option<String>,
+    },
+
+    /// Scan repository for AI-assisted commits via Co-Authored-By trailers
+    Scan {
+        /// Maximum number of commits to scan
+        #[arg(long)]
+        limit: Option<usize>,
+
+        /// Branch to scan (default: current HEAD)
+        #[arg(long)]
+        branch: Option<String>,
+
+        /// Only scan commits since this date (e.g., "7d", "30d", "2024-01-01")
+        #[arg(long)]
+        since: Option<String>,
+
+        /// Output format (text, json)
+        #[arg(long, default_value = "text")]
+        format: String,
     },
 
     /// Check for and install CLI updates
@@ -415,6 +437,13 @@ async fn main() -> ExitCode {
         },
 
         Some(Commands::Config { json, set }) => config::run(json, set.as_deref()).await,
+
+        Some(Commands::Scan {
+            limit,
+            branch,
+            since,
+            format,
+        }) => scan::run(limit, branch.as_deref(), since.as_deref(), &format).await,
 
         Some(Commands::Update { check }) => update::run(check).await,
 

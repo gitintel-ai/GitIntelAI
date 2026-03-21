@@ -864,4 +864,4 @@ A hosted SaaS version is planned. In the meantime, self-host with Docker Compose
 
 **How do I contribute?**
 
-See [AGENTS.md](./AGENTS.md) for the multi-agent development model and [TASKS.md](./TASKS.md) for the current sprint board. PRs welcome — open an issue first for anything beyond bug fixes.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines. PRs welcome — open an issue first for anything beyond bug fixes.

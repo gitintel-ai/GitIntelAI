@@ -113,7 +113,20 @@ pub async fn run() -> Result<()> {
         });
 
         file_attr.ai_lines.push((cp.line_start, cp.line_end));
-        total_ai_lines += cp.line_end - cp.line_start + 1;
+    }
+
+    // Merge overlapping ranges per file and compute total AI lines
+    for session in sessions.values_mut() {
+        for file_attr in session.files.values_mut() {
+            file_attr.ai_lines = merge_ranges(&file_attr.ai_lines);
+        }
+    }
+    for session in sessions.values() {
+        for file_attr in session.files.values() {
+            for &(start, end) in &file_attr.ai_lines {
+                total_ai_lines += end - start + 1;
+            }
+        }
     }
 
     // Get total lines changed in commit
@@ -213,4 +226,109 @@ fn parse_diff_stat_lines(stat: &str) -> i32 {
     }
 
     total
+}
+
+/// Merge overlapping or adjacent line ranges and return deduplicated ranges.
+///
+/// Given a list of (start, end) inclusive ranges, sorts by start and merges
+/// any overlapping or adjacent ranges so that no line is counted twice.
+pub fn merge_ranges(ranges: &[(i32, i32)]) -> Vec<(i32, i32)> {
+    if ranges.is_empty() {
+        return Vec::new();
+    }
+
+    let mut sorted: Vec<(i32, i32)> = ranges.to_vec();
+    sorted.sort_by_key(|&(start, _)| start);
+
+    let mut merged: Vec<(i32, i32)> = vec![sorted[0]];
+
+    for &(start, end) in &sorted[1..] {
+        let last = merged.last_mut().unwrap();
+        if start <= last.1 + 1 {
+            // Overlapping or adjacent — extend
+            last.1 = last.1.max(end);
+        } else {
+            merged.push((start, end));
+        }
+    }
+
+    merged
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_merge_ranges_no_overlap() {
+        let ranges = vec![(1, 10), (20, 30), (40, 50)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 10), (20, 30), (40, 50)]);
+    }
+
+    #[test]
+    fn test_merge_ranges_full_overlap() {
+        // Lines 1-50 then 1-80: should merge to 1-80
+        let ranges = vec![(1, 50), (1, 80)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 80)]);
+        let total: i32 = merged.iter().map(|(s, e)| e - s + 1).sum();
+        assert_eq!(total, 80);
+    }
+
+    #[test]
+    fn test_merge_ranges_partial_overlap() {
+        let ranges = vec![(1, 50), (30, 80)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 80)]);
+    }
+
+    #[test]
+    fn test_merge_ranges_adjacent() {
+        let ranges = vec![(1, 10), (11, 20)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 20)]);
+    }
+
+    #[test]
+    fn test_merge_ranges_unsorted_input() {
+        let ranges = vec![(30, 80), (1, 50)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 80)]);
+    }
+
+    #[test]
+    fn test_merge_ranges_empty() {
+        let ranges: Vec<(i32, i32)> = vec![];
+        let merged = merge_ranges(&ranges);
+        assert!(merged.is_empty());
+    }
+
+    #[test]
+    fn test_merge_ranges_single() {
+        let ranges = vec![(5, 15)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(5, 15)]);
+    }
+
+    #[test]
+    fn test_merge_ranges_multiple_overlaps() {
+        // Three overlapping ranges
+        let ranges = vec![(1, 30), (20, 50), (40, 80)];
+        let merged = merge_ranges(&ranges);
+        assert_eq!(merged, vec![(1, 80)]);
+        let total: i32 = merged.iter().map(|(s, e)| e - s + 1).sum();
+        assert_eq!(total, 80);
+    }
+
+    #[test]
+    fn test_merge_ranges_bug_scenario() {
+        // The exact bug scenario: Claude edits lines 1-50, then 1-80
+        // Without merging: 50 + 80 = 130 lines (wrong)
+        // With merging: 80 lines (correct)
+        let ranges = vec![(1, 50), (1, 80)];
+        let merged = merge_ranges(&ranges);
+        let total: i32 = merged.iter().map(|(s, e)| e - s + 1).sum();
+        assert_eq!(total, 80, "Should be 80, not 130");
+    }
 }

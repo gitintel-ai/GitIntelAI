@@ -2,10 +2,12 @@
 
 use crate::config::Config;
 use crate::error::{GitIntelError, Result};
+use crate::hooks::post_commit::AuthorshipLog;
 use crate::store::Database;
 use chrono::{Duration, Utc};
 use colored::Colorize;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::process::Command;
 
 /// Model pricing (per million tokens)
@@ -186,8 +188,8 @@ fn get_commit_cost(db: &Database, sha: &str) -> Result<CostSummary> {
     }
 
     // Aggregate by model and agent
-    let mut model_costs: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
-    let mut agent_costs: std::collections::HashMap<String, f64> = std::collections::HashMap::new();
+    let mut model_costs: HashMap<String, f64> = HashMap::new();
+    let mut agent_costs: HashMap<String, f64> = HashMap::new();
 
     for session in sessions {
         *model_costs.entry(session.model.clone()).or_insert(0.0) += session.cost_usd;
@@ -278,11 +280,23 @@ fn get_developer_cost(db: &Database, developer: &str, since: Option<&str>) -> Re
         ai_percentage: 0.0,
     };
 
-    for attr in attrs {
+    let mut model_costs: HashMap<String, f64> = HashMap::new();
+    let mut agent_costs: HashMap<String, f64> = HashMap::new();
+
+    for attr in &attrs {
         summary.ai_lines += attr.ai_lines as i64;
         summary.total_lines += attr.total_lines as i64;
         summary.total_cost_usd += attr.total_cost_usd;
+
+        if let Ok(log) = serde_json::from_str::<AuthorshipLog>(&attr.log_json) {
+            for session in &log.agent_sessions {
+                *model_costs.entry(session.model.clone()).or_insert(0.0) += session.cost_usd;
+                *agent_costs.entry(session.agent.clone()).or_insert(0.0) += session.cost_usd;
+            }
+        }
     }
+
+    populate_cost_breakdowns(&mut summary, model_costs, agent_costs);
 
     if summary.total_lines > 0 {
         summary.ai_percentage = (summary.ai_lines as f64 / summary.total_lines as f64) * 100.0;
@@ -310,17 +324,62 @@ fn get_period_cost(db: &Database, period: &str) -> Result<CostSummary> {
         ai_percentage: 0.0,
     };
 
-    for attr in attrs {
+    let mut model_costs: HashMap<String, f64> = HashMap::new();
+    let mut agent_costs: HashMap<String, f64> = HashMap::new();
+
+    for attr in &attrs {
         summary.ai_lines += attr.ai_lines as i64;
         summary.total_lines += attr.total_lines as i64;
         summary.total_cost_usd += attr.total_cost_usd;
+
+        if let Ok(log) = serde_json::from_str::<AuthorshipLog>(&attr.log_json) {
+            for session in &log.agent_sessions {
+                *model_costs.entry(session.model.clone()).or_insert(0.0) += session.cost_usd;
+                *agent_costs.entry(session.agent.clone()).or_insert(0.0) += session.cost_usd;
+            }
+        }
     }
+
+    populate_cost_breakdowns(&mut summary, model_costs, agent_costs);
 
     if summary.total_lines > 0 {
         summary.ai_percentage = (summary.ai_lines as f64 / summary.total_lines as f64) * 100.0;
     }
 
     Ok(summary)
+}
+
+/// Populate by_model and by_agent fields on a CostSummary from aggregated maps.
+fn populate_cost_breakdowns(
+    summary: &mut CostSummary,
+    model_costs: HashMap<String, f64>,
+    agent_costs: HashMap<String, f64>,
+) {
+    for (model, cost) in model_costs {
+        let pct = if summary.total_cost_usd > 0.0 {
+            (cost / summary.total_cost_usd) * 100.0
+        } else {
+            0.0
+        };
+        summary.by_model.push(ModelCost {
+            model,
+            cost_usd: cost,
+            percentage: pct,
+        });
+    }
+
+    for (agent, cost) in agent_costs {
+        let pct = if summary.total_cost_usd > 0.0 {
+            (cost / summary.total_cost_usd) * 100.0
+        } else {
+            0.0
+        };
+        summary.by_agent.push(AgentCost {
+            agent,
+            cost_usd: cost,
+            percentage: pct,
+        });
+    }
 }
 
 fn parse_period(period: &str) -> Result<Duration> {

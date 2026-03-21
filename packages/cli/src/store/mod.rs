@@ -3,4 +3,4 @@
 pub mod sqlite;
 pub mod sync;
 
-pub use sqlite::{Attribution, Checkpoint, CostSession, Database, Memory};
+pub use sqlite::{Attribution, Checkpoint, CostSession, Database, Memory, ScannedAgentStats, ScannedAttribution};

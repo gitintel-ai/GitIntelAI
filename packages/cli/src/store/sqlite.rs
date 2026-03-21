@@ -62,6 +62,29 @@ pub struct CostSession {
     pub cost_usd: f64,
 }
 
+/// Scanned attribution record - from Co-Authored-By trailer detection
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScannedAttribution {
+    pub commit_sha: String,
+    pub agent: String,
+    pub confidence: f64,
+    pub insertions: i64,
+    pub deletions: i64,
+    pub files_changed: i64,
+    pub scanned_at: String,
+}
+
+/// Aggregated scan statistics per agent
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ScannedAgentStats {
+    pub agent: String,
+    pub commit_count: i64,
+    pub total_insertions: i64,
+    pub total_deletions: i64,
+    pub total_files_changed: i64,
+    pub avg_confidence: f64,
+}
+
 /// Memory record - key-value facts about the codebase
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Memory {
@@ -161,6 +184,17 @@ impl Database {
                 value           TEXT NOT NULL
             );
 
+            -- Scanned attributions (from Co-Authored-By trailer detection)
+            CREATE TABLE IF NOT EXISTS scanned_attributions (
+                commit_sha      TEXT PRIMARY KEY,
+                agent           TEXT NOT NULL,
+                confidence      REAL NOT NULL DEFAULT 1.0,
+                insertions      INTEGER DEFAULT 0,
+                deletions       INTEGER DEFAULT 0,
+                files_changed   INTEGER DEFAULT 0,
+                scanned_at      TEXT NOT NULL
+            );
+
             -- Indexes
             CREATE INDEX IF NOT EXISTS idx_checkpoints_session ON checkpoints(session_id);
             CREATE INDEX IF NOT EXISTS idx_checkpoints_timestamp ON checkpoints(timestamp);
@@ -170,6 +204,8 @@ impl Database {
             CREATE INDEX IF NOT EXISTS idx_cost_sessions_started ON cost_sessions(started_at);
             CREATE INDEX IF NOT EXISTS idx_memory_category ON memory(category);
             CREATE INDEX IF NOT EXISTS idx_memory_last_used ON memory(last_used_at);
+            CREATE INDEX IF NOT EXISTS idx_scanned_agent ON scanned_attributions(agent);
+            CREATE INDEX IF NOT EXISTS idx_scanned_at ON scanned_attributions(scanned_at);
             "#,
         )?;
 
@@ -356,6 +392,93 @@ impl Database {
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         Ok(attrs)
+    }
+
+    // ==================== Scanned Attribution Operations ====================
+
+    /// Insert a scanned attribution from Co-Authored-By trailer detection
+    pub fn insert_scanned_attribution(
+        &self,
+        commit_sha: &str,
+        agent: &str,
+        confidence: f64,
+        insertions: i64,
+        deletions: i64,
+        files_changed: i64,
+    ) -> Result<()> {
+        self.conn.execute(
+            r#"
+            INSERT OR REPLACE INTO scanned_attributions (
+                commit_sha, agent, confidence, insertions, deletions, files_changed, scanned_at
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+            "#,
+            params![
+                commit_sha,
+                agent,
+                confidence,
+                insertions,
+                deletions,
+                files_changed,
+                Utc::now().to_rfc3339(),
+            ],
+        )?;
+        Ok(())
+    }
+
+    /// Get all scanned attributions
+    pub fn get_scanned_attributions(&self) -> Result<Vec<ScannedAttribution>> {
+        let mut stmt = self.conn.prepare(
+            "SELECT commit_sha, agent, confidence, insertions, deletions, files_changed, scanned_at FROM scanned_attributions ORDER BY scanned_at DESC",
+        )?;
+
+        let attrs = stmt
+            .query_map([], |row| {
+                Ok(ScannedAttribution {
+                    commit_sha: row.get(0)?,
+                    agent: row.get(1)?,
+                    confidence: row.get(2)?,
+                    insertions: row.get(3)?,
+                    deletions: row.get(4)?,
+                    files_changed: row.get(5)?,
+                    scanned_at: row.get(6)?,
+                })
+            })?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(attrs)
+    }
+
+    /// Get aggregated scan statistics grouped by agent
+    pub fn get_scanned_stats(&self) -> Result<Vec<ScannedAgentStats>> {
+        let mut stmt = self.conn.prepare(
+            r#"
+            SELECT
+                agent,
+                COUNT(*) as commit_count,
+                SUM(insertions) as total_insertions,
+                SUM(deletions) as total_deletions,
+                SUM(files_changed) as total_files,
+                AVG(confidence) as avg_confidence
+            FROM scanned_attributions
+            GROUP BY agent
+            ORDER BY commit_count DESC
+            "#,
+        )?;
+
+        let stats = stmt
+            .query_map([], |row| {
+                Ok(ScannedAgentStats {
+                    agent: row.get(0)?,
+                    commit_count: row.get(1)?,
+                    total_insertions: row.get(2)?,
+                    total_deletions: row.get(3)?,
+                    total_files_changed: row.get(4)?,
+                    avg_confidence: row.get(5)?,
+                })
+            })?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        Ok(stats)
     }
 
     // ==================== Cost Session Operations ====================

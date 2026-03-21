@@ -10,6 +10,24 @@
 GitIntel tracks AI authorship in your git history -- line by line, commit by commit.
 **The missing `git blame` for AI code.**
 
+<!-- TODO: Replace with actual demo GIF after first release -->
+<!-- ![GitIntel Demo](demo/hero.gif) -->
+
+```
+$ gitintel scan
+  Commits scanned:     312
+  AI-assisted commits: 127 (40.7%)
+  Agents: Claude Code (89), Cursor (24), Copilot (14)
+
+$ gitintel blame src/api.ts
+   1 [AI]  dc69ba8  Alice Chen  export async function createUser(
+   2 [AI]  dc69ba8  Alice Chen    data: CreateUserInput,
+  ...
+  55 [AI]  dc69ba8  Alice Chen  }
+  56 [HU]  dc69ba8  Alice Chen  // Hand-written validation
+  57 [HU]  dc69ba8  Alice Chen  function validateEmail(email: string) {
+```
+
 ## The Problem
 
 Engineering teams use Claude Code, Cursor, and Copilot daily. But nobody can answer:
@@ -120,6 +138,19 @@ By Developer:
 ```
 
 ## How It Works
+
+```
+┌──────────────┐     ┌──────────────────┐     ┌─────────────────────────┐
+│  AI Agent    │     │  GitIntel CLI     │     │  Git Repository         │
+│ Claude Code  │────▶│  (Rust binary)    │────▶│                         │
+│ Cursor       │     │                  │     │  refs/ai/authorship/    │
+│ Copilot      │     │  ┌────────────┐  │     │    └── <commit-sha>    │
+│ Any agent    │     │  │ SQLite DB  │  │     │        (YAML log)      │
+│              │     │  └────────────┘  │     │                         │
+└──────────────┘     └──────────────────┘     └─────────────────────────┘
+  PostToolUse hook     checkpoint → commit       open standard, travels
+  Co-Authored-By       hook → attribution        with push/fetch/clone
+```
 
 1. You `git commit` as normal -- no workflow change
 2. GitIntel's post-commit hook reads pending checkpoints from a local SQLite DB

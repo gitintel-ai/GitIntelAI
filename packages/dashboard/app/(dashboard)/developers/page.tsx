@@ -1,13 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
-import { useTeamStats } from "@/lib/hooks";
-import { Users } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ErrorState } from "@/components/error-state";
 import {
   Select,
   SelectContent,
@@ -15,6 +9,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useTeamStats } from "@/lib/hooks";
+import { Users } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 export default function DevelopersPage() {
   const [period, setPeriod] = useState("30d");
@@ -25,9 +24,7 @@ export default function DevelopersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Developer Leaderboard</h1>
-          <p className="text-muted-foreground">
-            AI adoption and cost metrics by developer
-          </p>
+          <p className="text-muted-foreground">AI adoption and cost metrics by developer</p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-[140px]">
@@ -69,10 +66,7 @@ export default function DevelopersPage() {
               {data.developers
                 .sort((a, b) => b.commits - a.commits)
                 .map((dev) => (
-                  <tr
-                    key={dev.email}
-                    className="border-b last:border-0 hover:bg-muted/50"
-                  >
+                  <tr key={dev.email} className="border-b last:border-0 hover:bg-muted/50">
                     <td className="p-4">
                       <Link
                         href={`/developers/${encodeURIComponent(dev.email)}`}
@@ -87,9 +81,7 @@ export default function DevelopersPage() {
                         {dev.aiPercentage.toFixed(1)}%
                       </span>
                     </td>
-                    <td className="text-right p-4">
-                      ${dev.costUsd.toFixed(2)}
-                    </td>
+                    <td className="text-right p-4">${dev.costUsd.toFixed(2)}</td>
                   </tr>
                 ))}
             </tbody>

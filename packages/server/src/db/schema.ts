@@ -1,5 +1,5 @@
-import { pgTable, text, timestamp, integer, real, jsonb, boolean, uuid } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
+import { boolean, integer, jsonb, pgTable, real, text, timestamp, uuid } from "drizzle-orm/pg-core";
 
 // ════════════════════════════════════════════════════════════════
 // Organizations
@@ -44,7 +44,9 @@ export const usersRelations = relations(users, ({ one }) => ({
 
 export const repositories = pgTable("repositories", {
   id: uuid("id").primaryKey().defaultRandom(),
-  orgId: uuid("org_id").references(() => organizations.id).notNull(),
+  orgId: uuid("org_id")
+    .references(() => organizations.id)
+    .notNull(),
   name: text("name").notNull(),
   remoteUrl: text("remote_url"),
   defaultBranch: text("default_branch").default("main"),
@@ -120,7 +122,9 @@ export const costSessionsRelations = relations(costSessions, ({ one }) => ({
 
 export const budgetAlerts = pgTable("budget_alerts", {
   id: uuid("id").primaryKey().defaultRandom(),
-  orgId: uuid("org_id").references(() => organizations.id).notNull(),
+  orgId: uuid("org_id")
+    .references(() => organizations.id)
+    .notNull(),
   type: text("type").notNull(), // daily, weekly, monthly
   thresholdUsd: real("threshold_usd").notNull(),
   channelsJson: jsonb("channels_json").default({}),

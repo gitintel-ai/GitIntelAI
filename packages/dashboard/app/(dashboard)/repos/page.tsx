@@ -1,10 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
+import { LoadingCard } from "@/components/loading-card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -13,21 +23,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { GitBranch, GitCommit, DollarSign, Bot, Search } from "lucide-react";
-import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
-import { EmptyState } from "@/components/empty-state";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useRepositories } from "@/lib/hooks";
+import { Bot, DollarSign, GitBranch, GitCommit, Search } from "lucide-react";
 import { FolderGit2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 function getAIBadgeVariant(pct: number): "default" | "secondary" | "destructive" {
   if (pct >= 50) return "default";
@@ -50,7 +50,6 @@ export default function ReposPage() {
           return b.aiPct - a.aiPct;
         case "cost":
           return b.totalCostUsd - a.totalCostUsd;
-        case "commits":
         default:
           return b.commits - a.commits;
       }
@@ -58,19 +57,14 @@ export default function ReposPage() {
 
   const totalRepos = repos.length;
   const totalCost = repos.reduce((sum, r) => sum + r.totalCostUsd, 0);
-  const avgAIPct =
-    repos.length > 0
-      ? repos.reduce((sum, r) => sum + r.aiPct, 0) / repos.length
-      : 0;
+  const avgAIPct = repos.length > 0 ? repos.reduce((sum, r) => sum + r.aiPct, 0) / repos.length : 0;
   const totalCommits = repos.reduce((sum, r) => sum + r.commits, 0);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Repositories</h1>
-        <p className="text-muted-foreground">
-          AI adoption and cost breakdown by repository
-        </p>
+        <p className="text-muted-foreground">AI adoption and cost breakdown by repository</p>
       </div>
 
       {isError && (
@@ -105,9 +99,7 @@ export default function ReposPage() {
               <GitCommit className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
-                {totalCommits.toLocaleString()}
-              </div>
+              <div className="text-2xl font-bold">{totalCommits.toLocaleString()}</div>
             </CardContent>
           </Card>
           <Card>
@@ -178,10 +170,7 @@ export default function ReposPage() {
                 {filteredRepos.map((repo) => (
                   <TableRow key={repo.id}>
                     <TableCell>
-                      <Link
-                        href={`/repos/${repo.id}`}
-                        className="font-medium hover:underline"
-                      >
+                      <Link href={`/repos/${repo.id}`} className="font-medium hover:underline">
                         {repo.name}
                       </Link>
                     </TableCell>
@@ -193,15 +182,9 @@ export default function ReposPage() {
                         </Badge>
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      {repo.commits.toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      ${repo.totalCostUsd.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {repo.developers}
-                    </TableCell>
+                    <TableCell className="text-right">{repo.commits.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${repo.totalCostUsd.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{repo.developers}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

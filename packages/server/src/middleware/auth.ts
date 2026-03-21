@@ -1,9 +1,9 @@
-import { createMiddleware } from "hono/factory";
+import { createHash } from "node:crypto";
 import { verifyToken } from "@clerk/backend";
-import { createHash } from "crypto";
-import { db } from "../db";
-import { apiKeys, users } from "../db/schema";
 import { eq } from "drizzle-orm";
+import { createMiddleware } from "hono/factory";
+import { db } from "../db";
+import { apiKeys } from "../db/schema";
 
 export interface AuthContext {
   userId: string;
@@ -21,6 +21,7 @@ declare module "hono" {
  * Sets all auth context variables for downstream middleware/routes.
  * Routes use c.get("auth"), RBAC uses c.get("user") and c.get("orgId").
  */
+// biome-ignore lint/suspicious/noExplicitAny: Hono context type varies by route, generic any is simplest here
 function setAuthContext(c: any, auth: AuthContext) {
   c.set("auth", auth);
   c.set("user", { id: auth.userId, role: auth.role || "developer" });
@@ -69,6 +70,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 
     try {
       const payload = await verifyToken(token, {
+        // biome-ignore lint/style/noNonNullAssertion: CLERK_SECRET_KEY is required at runtime, validated at startup
         secretKey: process.env.CLERK_SECRET_KEY!,
       });
 

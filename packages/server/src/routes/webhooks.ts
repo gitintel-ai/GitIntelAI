@@ -1,5 +1,5 @@
+import crypto from "node:crypto";
 import { Hono } from "hono";
-import crypto from "crypto";
 
 export const webhookRoutes = new Hono();
 
@@ -22,7 +22,7 @@ webhookRoutes.post("/github", async (c) => {
   const secret = process.env.GITHUB_WEBHOOK_SECRET;
   if (secret) {
     const hmac = crypto.createHmac("sha256", secret);
-    const digest = "sha256=" + hmac.update(body).digest("hex");
+    const digest = `sha256=${hmac.update(body).digest("hex")}`;
 
     if (signature !== digest) {
       return c.json({ error: "Invalid signature" }, 401);
@@ -48,6 +48,7 @@ webhookRoutes.post("/github", async (c) => {
   return c.json({ success: true, event, deliveryId: delivery });
 });
 
+// biome-ignore lint/suspicious/noExplicitAny: GitHub webhook payload is dynamic JSON
 async function handlePullRequest(payload: any) {
   const action = payload.action;
   const pr = payload.pull_request;
@@ -60,6 +61,7 @@ async function handlePullRequest(payload: any) {
   }
 }
 
+// biome-ignore lint/suspicious/noExplicitAny: GitHub webhook payload is dynamic JSON
 async function handlePush(payload: any) {
   const commits = payload.commits || [];
 

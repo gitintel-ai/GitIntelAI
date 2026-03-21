@@ -1,6 +1,6 @@
+import { eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import { sql, eq } from "drizzle-orm";
-import { db, attributions } from "../db";
+import { attributions, db } from "../db";
 
 export const attributionRoutes = new Hono();
 
@@ -34,8 +34,8 @@ attributionRoutes.get("/:sha", async (c) => {
 // ════════════════════════════════════════════════════════════════
 
 attributionRoutes.get("/", async (c) => {
-  const limit = parseInt(c.req.query("limit") || "50");
-  const offset = parseInt(c.req.query("offset") || "0");
+  const limit = Number.parseInt(c.req.query("limit") || "50");
+  const offset = Number.parseInt(c.req.query("offset") || "0");
 
   try {
     const results = await db

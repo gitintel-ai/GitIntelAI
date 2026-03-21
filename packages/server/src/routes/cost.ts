@@ -1,7 +1,7 @@
-import { Hono } from "hono";
-import { sql } from "drizzle-orm";
-import { db, costSessions, attributions } from "../db";
 import { getDateFromPeriod } from "@gitintel/core";
+import { sql } from "drizzle-orm";
+import { Hono } from "hono";
+import { costSessions, db } from "../db";
 
 export const costRoutes = new Hono();
 

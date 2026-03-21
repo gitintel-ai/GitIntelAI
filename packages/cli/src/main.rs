@@ -465,31 +465,26 @@ async fn main() -> ExitCode {
             println!();
             println!("  {}:", "Quick start".cyan().bold());
             println!(
-                "    {}           {}",
-                "gitintel scan".green(),
-                "Detect AI commits (zero setup)"
+                "    {}           Detect AI commits (zero setup)",
+                "gitintel scan".green()
             );
             println!(
-                "    {}           {}",
-                "gitintel init".green(),
-                "Set up live tracking"
+                "    {}           Set up live tracking",
+                "gitintel init".green()
             );
             println!(
-                "    {}          {}",
-                "gitintel stats".green(),
-                "View AI adoption stats"
+                "    {}          View AI adoption stats",
+                "gitintel stats".green()
             );
             println!(
-                "    {}   {}",
-                "gitintel blame <file>".green(),
-                "See AI vs human per line"
+                "    {}   See AI vs human per line",
+                "gitintel blame <file>".green()
             );
             println!();
-            println!("  {}  {}", "All commands:".dimmed(), "gitintel --help");
+            println!("  {}  gitintel --help", "All commands:".dimmed());
             println!(
-                "  {}          {}",
-                "Docs:".dimmed(),
-                "https://github.com/gitintel-ai/GitIntelAI"
+                "  {}          https://github.com/gitintel-ai/GitIntelAI",
+                "Docs:".dimmed()
             );
             Ok(())
         }

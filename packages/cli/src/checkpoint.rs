@@ -41,6 +41,7 @@ fn parse_line_ranges(lines: &str) -> Result<Vec<(i32, i32)>> {
 }
 
 /// Run the checkpoint command
+#[allow(clippy::too_many_arguments)]
 pub async fn run(
     agent: &str,
     model: &str,

@@ -1,8 +1,8 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Terminal, Package, CheckCircle, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Package, Terminal } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Install GitIntel AI - Build from Source",
@@ -46,9 +46,7 @@ export default function InstallPage() {
           <Terminal className="mr-1 h-3 w-3" />
           v0.1.0
         </Badge>
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-          Install GitIntel AI
-        </h1>
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Install GitIntel AI</h1>
         <p className="mt-4 text-lg text-muted-foreground">
           The gitintel CLI is built with Rust. Install from source using Cargo.
         </p>
@@ -101,21 +99,19 @@ export default function InstallPage() {
         <Step n={2} title="Build the CLI">
           <CodeBlock>
             <p>
-              <span className="text-green-400">$</span> cargo build --release
-              --manifest-path packages/cli/Cargo.toml
+              <span className="text-green-400">$</span> cargo build --release --manifest-path
+              packages/cli/Cargo.toml
             </p>
           </CodeBlock>
           <p className="mt-3 text-sm text-muted-foreground">
             On Windows, if the build fails with{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              os error 32
-            </code>
-            , use single-threaded build:
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">os error 32</code>, use
+            single-threaded build:
           </p>
           <CodeBlock>
             <p>
-              <span className="text-green-400">$</span> cargo build --jobs 1
-              --manifest-path packages/cli/Cargo.toml
+              <span className="text-green-400">$</span> cargo build --jobs 1 --manifest-path
+              packages/cli/Cargo.toml
             </p>
           </CodeBlock>
         </Step>
@@ -127,8 +123,8 @@ export default function InstallPage() {
           <CodeBlock>
             <p className="text-muted-foreground"># Linux / macOS</p>
             <p>
-              <span className="text-green-400">$</span> cp
-              packages/cli/target/release/gitintel ~/.local/bin/
+              <span className="text-green-400">$</span> cp packages/cli/target/release/gitintel
+              ~/.local/bin/
             </p>
             <p className="mt-2 text-muted-foreground"># Windows</p>
             <p>
@@ -155,46 +151,31 @@ export default function InstallPage() {
             <p>
               <span className="text-green-400">$</span> gitintel init
             </p>
-            <p className="mt-2 text-muted-foreground">
-              Initializing GitIntel...
-            </p>
+            <p className="mt-2 text-muted-foreground">Initializing GitIntel...</p>
             <p className="text-green-400">{"  "}✓ Created ~/.gitintel/</p>
-            <p className="text-green-400">
-              {"  "}✓ Database initialized
-            </p>
-            <p className="text-green-400">
-              {"  "}✓ Git hooks installed
-            </p>
-            <p className="mt-1 text-muted-foreground">
-              GitIntel initialized successfully!
-            </p>
+            <p className="text-green-400">{"  "}✓ Database initialized</p>
+            <p className="text-green-400">{"  "}✓ Git hooks installed</p>
+            <p className="mt-1 text-muted-foreground">GitIntel initialized successfully!</p>
           </CodeBlock>
         </Step>
 
         <Step n={6} title="Enable Claude Code telemetry (optional)">
           <p className="mb-3 text-sm text-muted-foreground">
             Add these to your shell profile (
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              ~/.bashrc
-            </code>
-            ,{" "}
-            <code className="rounded bg-muted px-1 py-0.5 text-xs">
-              ~/.zshrc
-            </code>
-            ) to capture Claude Code costs automatically:
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">~/.bashrc</code>,{" "}
+            <code className="rounded bg-muted px-1 py-0.5 text-xs">~/.zshrc</code>) to capture
+            Claude Code costs automatically:
           </p>
           <CodeBlock>
             <p>
-              <span className="text-blue-400">export</span>{" "}
-              CLAUDE_CODE_ENABLE_TELEMETRY=1
+              <span className="text-blue-400">export</span> CLAUDE_CODE_ENABLE_TELEMETRY=1
             </p>
             <p>
               <span className="text-blue-400">export</span>{" "}
               OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
             </p>
             <p>
-              <span className="text-blue-400">export</span>{" "}
-              OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+              <span className="text-blue-400">export</span> OTEL_EXPORTER_OTLP_PROTOCOL=grpc
             </p>
           </CodeBlock>
         </Step>
@@ -229,10 +210,7 @@ export default function InstallPage() {
           </div>
           <div className="flex items-center gap-3">
             <Package className="h-4 w-4 shrink-0" />
-            <span>
-              Pre-built binaries for Linux AMD64/ARM64, macOS AMD64/ARM64,
-              Windows AMD64
-            </span>
+            <span>Pre-built binaries for Linux AMD64/ARM64, macOS AMD64/ARM64, Windows AMD64</span>
           </div>
         </CardContent>
       </Card>
@@ -240,10 +218,7 @@ export default function InstallPage() {
       <div className="mt-12 text-center">
         <p className="text-muted-foreground">
           Next:{" "}
-          <Link
-            href="/docs"
-            className="font-medium text-primary underline underline-offset-4"
-          >
+          <Link href="/docs" className="font-medium text-primary underline underline-offset-4">
             Read the documentation
           </Link>{" "}
           to start tracking AI adoption.

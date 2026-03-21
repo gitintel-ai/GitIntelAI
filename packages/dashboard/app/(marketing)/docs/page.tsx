@@ -1,24 +1,18 @@
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ArrowRight,
+  Brain,
+  Database,
+  DollarSign,
+  ExternalLink,
+  GitBranch,
+  Settings,
+  Terminal,
+} from "lucide-react";
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Terminal,
-  GitBranch,
-  DollarSign,
-  Brain,
-  Settings,
-  Database,
-  ArrowRight,
-  ExternalLink,
-} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Documentation - GitIntel AI",
@@ -140,8 +134,7 @@ const sections = [
   {
     icon: Settings,
     title: "Configuration",
-    description:
-      "All configuration keys, defaults, and how to set them via gitintel config.",
+    description: "All configuration keys, defaults, and how to set them via gitintel config.",
     links: [
       {
         label: "Config Reference",
@@ -164,12 +157,10 @@ export default function DocsPage() {
         <Badge variant="secondary" className="mb-4">
           v0.1.0
         </Badge>
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-          Documentation
-        </h1>
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Documentation</h1>
         <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-          Everything you need to install, configure, and use GitIntel AI.
-          Full documentation lives in the GitHub repository.
+          Everything you need to install, configure, and use GitIntel AI. Full documentation lives
+          in the GitHub repository.
         </p>
         <div className="mt-6 flex gap-4">
           <Link
@@ -199,18 +190,13 @@ export default function DocsPage() {
           <p>
             <span className="text-green-400">$</span> gitintel init
           </p>
-          <p className="mt-3 text-muted-foreground">
-            # Record an AI coding session
-          </p>
+          <p className="mt-3 text-muted-foreground"># Record an AI coding session</p>
           <p>
-            <span className="text-green-400">$</span> gitintel checkpoint
-            --agent &quot;Claude Code&quot; --model claude-sonnet-4-6
-            --session-id sess_abc123 --file src/auth.ts --lines 12-45
-            --cost-usd 0.0234
+            <span className="text-green-400">$</span> gitintel checkpoint --agent &quot;Claude
+            Code&quot; --model claude-sonnet-4-6 --session-id sess_abc123 --file src/auth.ts --lines
+            12-45 --cost-usd 0.0234
           </p>
-          <p className="mt-3 text-muted-foreground">
-            # Show AI attribution for a file
-          </p>
+          <p className="mt-3 text-muted-foreground"># Show AI attribution for a file</p>
           <p>
             <span className="text-green-400">$</span> gitintel blame src/auth.ts
           </p>
@@ -222,18 +208,13 @@ export default function DocsPage() {
           <p>
             <span className="text-green-400">$</span> gitintel cost --since 7d
           </p>
-          <p className="mt-3 text-muted-foreground">
-            # Generate CLAUDE.md from repo scan
-          </p>
+          <p className="mt-3 text-muted-foreground"># Generate CLAUDE.md from repo scan</p>
           <p>
             <span className="text-green-400">$</span> gitintel context init
           </p>
-          <p className="mt-3 text-muted-foreground">
-            # Optimize existing CLAUDE.md
-          </p>
+          <p className="mt-3 text-muted-foreground"># Optimize existing CLAUDE.md</p>
           <p>
-            <span className="text-green-400">$</span> gitintel context optimize
-            --apply
+            <span className="text-green-400">$</span> gitintel context optimize --apply
           </p>
         </div>
       </div>
@@ -284,11 +265,8 @@ export default function DocsPage() {
         <h2 className="text-xl font-semibold">Full Documentation on GitHub</h2>
         <p className="mt-2 text-muted-foreground">
           The primary documentation is{" "}
-          <code className="rounded bg-muted px-1 py-0.5 text-xs">
-            GETTING_STARTED.md
-          </code>{" "}
-          in the repository — 868 lines covering every feature with working
-          examples.
+          <code className="rounded bg-muted px-1 py-0.5 text-xs">GETTING_STARTED.md</code> in the
+          repository — 868 lines covering every feature with working examples.
         </p>
         <a
           href="https://github.com/gitintel-ai/GitIntelAI/blob/main/GETTING_STARTED.md"

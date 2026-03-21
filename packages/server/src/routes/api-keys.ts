@@ -1,10 +1,10 @@
+import { randomUUID } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
+import { and, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
 import { apiKeys, auditLogs } from "../db/schema";
-import { eq, and, desc } from "drizzle-orm";
 import { requirePermission } from "../middleware/rbac";
-import { randomUUID } from "crypto";
-import { randomBytes, createHash } from "crypto";
 
 const app = new Hono();
 
@@ -31,9 +31,9 @@ export function hashApiKey(key: string): string {
 /**
  * Mask an API key for display
  */
-function maskKey(key: string): string {
+function _maskKey(key: string): string {
   if (key.length <= 12) return "****";
-  return key.substring(0, 12) + "..." + key.substring(key.length - 4);
+  return `${key.substring(0, 12)}...${key.substring(key.length - 4)}`;
 }
 
 /**
@@ -113,16 +113,19 @@ app.post("/", requirePermission("api_keys", "create"), async (c) => {
   });
 
   // Return the full key only once - it cannot be retrieved again
-  return c.json({
-    id,
-    name: body.name,
-    key, // Full key - only shown once!
-    keyPrefix: key.substring(0, 12),
-    scopes: body.scopes || ["sync:write", "stats:read"],
-    expiresAt,
-    createdAt: new Date(),
-    warning: "Save this key securely. It cannot be retrieved again.",
-  }, 201);
+  return c.json(
+    {
+      id,
+      name: body.name,
+      key, // Full key - only shown once!
+      keyPrefix: key.substring(0, 12),
+      scopes: body.scopes || ["sync:write", "stats:read"],
+      expiresAt,
+      createdAt: new Date(),
+      warning: "Save this key securely. It cannot be retrieved again.",
+    },
+    201,
+  );
 });
 
 /**
@@ -182,10 +185,7 @@ app.patch("/:id", requirePermission("api_keys", "update"), async (c) => {
   if (body.name) updates.name = body.name;
   if (body.scopes) updates.scopes = body.scopes;
 
-  await db
-    .update(apiKeys)
-    .set(updates)
-    .where(eq(apiKeys.id, keyId));
+  await db.update(apiKeys).set(updates).where(eq(apiKeys.id, keyId));
 
   // Audit log
   await db.insert(auditLogs).values({
@@ -256,11 +256,7 @@ export async function validateApiKey(key: string): Promise<{
 
   const hash = hashApiKey(key);
 
-  const [apiKey] = await db
-    .select()
-    .from(apiKeys)
-    .where(eq(apiKeys.keyHash, hash))
-    .limit(1);
+  const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, hash)).limit(1);
 
   if (!apiKey) {
     return { valid: false };
@@ -272,10 +268,7 @@ export async function validateApiKey(key: string): Promise<{
   }
 
   // Update last used
-  await db
-    .update(apiKeys)
-    .set({ lastUsedAt: new Date() })
-    .where(eq(apiKeys.id, apiKey.id));
+  await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, apiKey.id));
 
   return {
     valid: true,

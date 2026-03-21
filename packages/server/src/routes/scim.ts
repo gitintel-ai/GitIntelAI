@@ -1,8 +1,8 @@
+import { randomUUID } from "node:crypto";
+import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db";
-import { users, organizations } from "../db/schema";
-import { eq, and, or, like } from "drizzle-orm";
-import { randomUUID } from "crypto";
+import { users } from "../db/schema";
 import { createAuditLog } from "./audit";
 
 const app = new Hono();
@@ -101,6 +101,7 @@ function scimError(status: number, detail: string, scimType?: string): ScimError
 /**
  * SCIM authentication middleware
  */
+// biome-ignore lint/suspicious/noExplicitAny: SCIM middleware uses generic Hono context and next types
 async function scimAuth(c: any, next: any) {
   const authHeader = c.req.header("Authorization");
 
@@ -241,8 +242,8 @@ app.get("/Users", async (c) => {
   const baseUrl = c.req.url.replace(/\?.*$/, "").replace("/Users", "");
 
   // Parse query params
-  const startIndex = parseInt(c.req.query("startIndex") || "1");
-  const count = Math.min(parseInt(c.req.query("count") || "100"), 100);
+  const startIndex = Number.parseInt(c.req.query("startIndex") || "1");
+  const count = Math.min(Number.parseInt(c.req.query("count") || "100"), 100);
   const filter = c.req.query("filter");
 
   let whereClause = eq(users.organizationId, orgId);
@@ -253,8 +254,10 @@ app.get("/Users", async (c) => {
     if (match) {
       const [, field, value] = match;
       if (field === "userName" || field === "email") {
+        // biome-ignore lint/suspicious/noExplicitAny: drizzle-orm and() returns a complex conditional type that doesn't match the base where clause type
         whereClause = and(whereClause, eq(users.email, value)) as any;
       } else if (field === "externalId") {
+        // biome-ignore lint/suspicious/noExplicitAny: drizzle-orm and() returns a complex conditional type that doesn't match the base where clause type
         whereClause = and(whereClause, eq(users.externalId, value)) as any;
       }
     }
@@ -415,6 +418,7 @@ app.patch("/Users/:id", async (c) => {
     Operations: Array<{
       op: "add" | "remove" | "replace";
       path?: string;
+      // biome-ignore lint/suspicious/noExplicitAny: SCIM PATCH operation value can be any JSON type
       value?: any;
     }>;
   }>();

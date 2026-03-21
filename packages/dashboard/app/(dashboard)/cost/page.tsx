@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { KpiCard } from "@/components/kpi-card";
 import { CostTrendChart } from "@/components/charts/cost-trend-chart";
-import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
-import { useCostSummary, useCostDaily } from "@/lib/hooks";
-import { DollarSign as DollarSignIcon } from "lucide-react";
+import { ErrorState } from "@/components/error-state";
+import { KpiCard } from "@/components/kpi-card";
+import { LoadingCard } from "@/components/loading-card";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -24,6 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useCostDaily, useCostSummary } from "@/lib/hooks";
+import { DollarSign as DollarSignIcon } from "lucide-react";
+import { useState } from "react";
 
 export default function CostPage() {
   const [period, setPeriod] = useState("30d");
@@ -74,19 +74,11 @@ export default function CostPage() {
       ) : summary.data && summary.data.totalCostUsd > 0 ? (
         <>
           <div className="grid gap-4 md:grid-cols-3">
-            <KpiCard
-              title="Total Spend"
-              value={`$${summary.data.totalCostUsd.toFixed(2)}`}
-            />
-            <KpiCard
-              title="Models Used"
-              value={String(summary.data.byModel.length)}
-            />
+            <KpiCard title="Total Spend" value={`$${summary.data.totalCostUsd.toFixed(2)}`} />
+            <KpiCard title="Models Used" value={String(summary.data.byModel.length)} />
             <KpiCard
               title="Total Sessions"
-              value={summary.data.byModel
-                .reduce((s, m) => s + m.sessions, 0)
-                .toLocaleString()}
+              value={summary.data.byModel.reduce((s, m) => s + m.sessions, 0).toLocaleString()}
             />
           </div>
 
@@ -115,12 +107,8 @@ export default function CostPage() {
                       <TableCell>
                         <Badge variant="outline">{m.model}</Badge>
                       </TableCell>
-                      <TableCell className="text-right">
-                        ${m.costUsd.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {m.percentage.toFixed(1)}%
-                      </TableCell>
+                      <TableCell className="text-right">${m.costUsd.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">{m.percentage.toFixed(1)}%</TableCell>
                       <TableCell className="text-right">{m.sessions}</TableCell>
                     </TableRow>
                   ))}

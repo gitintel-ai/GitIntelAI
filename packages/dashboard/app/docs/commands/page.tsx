@@ -1,32 +1,33 @@
-import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Commands Reference — GitIntel AI Docs",
-  description: "Full reference for all gitintel CLI commands: blame, stats, cost, context, memory, sync, hooks, config.",
+  description:
+    "Full reference for all gitintel CLI commands: blame, stats, cost, context, memory, sync, hooks, config.",
 };
 
 const commands = [
   {
     name: "gitintel init",
-    description: "Initialize GitIntel in a repository. Installs git hooks and creates local config.",
+    description:
+      "Initialize GitIntel in a repository. Installs git hooks and creates local config.",
     usage: "gitintel init [--force]",
-    flags: [
-      { flag: "--force", description: "Overwrite existing config and hooks" },
-    ],
+    flags: [{ flag: "--force", description: "Overwrite existing config and hooks" }],
     example: `cd your-project
 gitintel init`,
   },
   {
     name: "gitintel checkpoint",
     description: "Record an AI agent's contribution to a file. Call this before git commit.",
-    usage: "gitintel checkpoint --agent <name> --model <id> --session-id <id> --file <path> --lines <ranges>",
+    usage:
+      "gitintel checkpoint --agent <name> --model <id> --session-id <id> --file <path> --lines <ranges>",
     flags: [
-      { flag: "--agent", description: "Agent name: \"Claude Code\", \"Cursor\", \"Copilot\", etc." },
-      { flag: "--model", description: "Model ID: \"claude-sonnet-4-6\", \"gpt-4o\", etc." },
+      { flag: "--agent", description: 'Agent name: "Claude Code", "Cursor", "Copilot", etc.' },
+      { flag: "--model", description: 'Model ID: "claude-sonnet-4-6", "gpt-4o", etc.' },
       { flag: "--session-id", description: "Unique ID for this coding session" },
       { flag: "--file", description: "File path relative to repo root" },
-      { flag: "--lines", description: "Line ranges written by the agent, e.g. \"12-45,78-103\"" },
+      { flag: "--lines", description: 'Line ranges written by the agent, e.g. "12-45,78-103"' },
       { flag: "--tokens-in", description: "Input tokens consumed (optional)" },
       { flag: "--tokens-out", description: "Output tokens produced (optional)" },
       { flag: "--cost-usd", description: "Cost in USD (optional, overrides token calc)" },
@@ -89,11 +90,15 @@ Trend:        ↑ +8% AI adoption vs previous 30 days`,
   {
     name: "gitintel cost",
     description: "Show development cost broken down by commit, branch, developer, or time period.",
-    usage: "gitintel cost [--since <period>] [--commit <sha>] [--branch <name>] [--developer <email>]",
+    usage:
+      "gitintel cost [--since <period>] [--commit <sha>] [--branch <name>] [--developer <email>]",
     flags: [
       { flag: "--since <period>", description: "Time period: 7d, 30d, 90d" },
       { flag: "--commit <sha>", description: "Cost for a specific commit" },
-      { flag: "--branch <name>", description: "Cost for a feature branch (from branch point to HEAD)" },
+      {
+        flag: "--branch <name>",
+        description: "Cost for a feature branch (from branch point to HEAD)",
+      },
       { flag: "--developer <email>", description: "Cost for a specific developer" },
       { flag: "--format", description: "Output format: table (default), json, csv" },
     ],
@@ -165,9 +170,7 @@ gitintel memory prune --unused-days 30 --dry-run`,
     name: "gitintel sync",
     description: "Sync local attribution and cost data to a cloud API server.",
     usage: "gitintel sync [--dry-run]",
-    flags: [
-      { flag: "--dry-run", description: "Preview what would be synced without sending" },
-    ],
+    flags: [{ flag: "--dry-run", description: "Preview what would be synced without sending" }],
     example: `gitintel config --set cloudSync.enabled=true
 gitintel config --set cloudSync.endpoint=https://your-server.example.com/api/v1
 gitintel sync`,
@@ -191,10 +194,14 @@ export default function CommandsPage() {
   return (
     <article className="max-w-none">
       <div className="mb-8">
-        <Badge variant="secondary" className="mb-3">Documentation</Badge>
+        <Badge variant="secondary" className="mb-3">
+          Documentation
+        </Badge>
         <h1 className="text-3xl font-bold tracking-tight">Commands Reference</h1>
         <p className="mt-3 text-lg text-muted-foreground">
-          Complete reference for all <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-base">gitintel</code> CLI commands.
+          Complete reference for all{" "}
+          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-base">gitintel</code> CLI
+          commands.
         </p>
       </div>
 
@@ -209,19 +216,25 @@ export default function CommandsPage() {
             <p className="text-muted-foreground mb-4">{cmd.description}</p>
 
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Usage</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Usage
+              </p>
               <div className="rounded-lg bg-muted p-3 font-mono text-xs">{cmd.usage}</div>
             </div>
 
             {cmd.flags.length > 0 && (
               <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Flags</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                  Flags
+                </p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <tbody>
                       {cmd.flags.map((f) => (
                         <tr key={f.flag} className="border-b last:border-0">
-                          <td className="py-2 pr-4 font-mono text-xs text-primary whitespace-nowrap">{f.flag}</td>
+                          <td className="py-2 pr-4 font-mono text-xs text-primary whitespace-nowrap">
+                            {f.flag}
+                          </td>
                           <td className="py-2 text-muted-foreground">{f.description}</td>
                         </tr>
                       ))}
@@ -232,14 +245,22 @@ export default function CommandsPage() {
             )}
 
             <div className="mb-4">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Example</p>
-              <div className="rounded-lg bg-muted p-3 font-mono text-xs whitespace-pre">{cmd.example}</div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                Example
+              </p>
+              <div className="rounded-lg bg-muted p-3 font-mono text-xs whitespace-pre">
+                {cmd.example}
+              </div>
             </div>
 
             {cmd.output && (
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Output</p>
-                <div className="rounded-lg border bg-muted/40 p-3 font-mono text-xs whitespace-pre">{cmd.output}</div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                  Output
+                </p>
+                <div className="rounded-lg border bg-muted/40 p-3 font-mono text-xs whitespace-pre">
+                  {cmd.output}
+                </div>
               </div>
             )}
           </section>

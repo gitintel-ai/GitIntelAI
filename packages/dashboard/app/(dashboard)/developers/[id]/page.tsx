@@ -1,12 +1,12 @@
 "use client";
 
-import { use } from "react";
+import { EmptyState } from "@/components/empty-state";
+import { ErrorState } from "@/components/error-state";
 import { KpiCard } from "@/components/kpi-card";
 import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
-import { EmptyState } from "@/components/empty-state";
 import { useDeveloperStats } from "@/lib/hooks";
 import { UserX } from "lucide-react";
+import { use } from "react";
 
 export default function DeveloperProfilePage({
   params,
@@ -41,22 +41,10 @@ export default function DeveloperProfilePage({
       ) : data && data.commits > 0 ? (
         <>
           <div className="grid gap-4 md:grid-cols-4">
-            <KpiCard
-              title="AI Adoption"
-              value={`${data.aiPercentage.toFixed(1)}%`}
-            />
-            <KpiCard
-              title="Total Cost"
-              value={`$${data.totalCost.toFixed(2)}`}
-            />
-            <KpiCard
-              title="Commits"
-              value={data.commits.toLocaleString()}
-            />
-            <KpiCard
-              title="Total Lines"
-              value={data.totalLines.toLocaleString()}
-            />
+            <KpiCard title="AI Adoption" value={`${data.aiPercentage.toFixed(1)}%`} />
+            <KpiCard title="Total Cost" value={`$${data.totalCost.toFixed(2)}`} />
+            <KpiCard title="Commits" value={data.commits.toLocaleString()} />
+            <KpiCard title="Total Lines" value={data.totalLines.toLocaleString()} />
           </div>
 
           <div className="rounded-lg border bg-card p-6">
@@ -75,25 +63,16 @@ export default function DeveloperProfilePage({
                 </thead>
                 <tbody>
                   {data.recentCommits.map((c) => (
-                    <tr
-                      key={c.sha}
-                      className="border-b last:border-0 hover:bg-muted/50"
-                    >
+                    <tr key={c.sha} className="border-b last:border-0 hover:bg-muted/50">
                       <td className="p-3">
-                        <code className="text-xs bg-muted px-1 rounded">
-                          {c.sha.slice(0, 8)}
-                        </code>
+                        <code className="text-xs bg-muted px-1 rounded">{c.sha.slice(0, 8)}</code>
                       </td>
                       <td className="text-right p-3">{c.aiLines}</td>
                       <td className="text-right p-3">{c.humanLines}</td>
                       <td className="text-right p-3">
-                        <span className="text-blue-600">
-                          {c.aiPct?.toFixed(1) ?? "0.0"}%
-                        </span>
+                        <span className="text-blue-600">{c.aiPct?.toFixed(1) ?? "0.0"}%</span>
                       </td>
-                      <td className="text-right p-3">
-                        ${c.costUsd?.toFixed(2) ?? "0.00"}
-                      </td>
+                      <td className="text-right p-3">${c.costUsd?.toFixed(2) ?? "0.00"}</td>
                       <td className="text-right p-3 text-sm text-muted-foreground">
                         {new Date(c.authoredAt).toLocaleDateString()}
                       </td>

@@ -1,16 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import {
-  getModelPricing,
   calculateCost,
-  parsePeriod,
-  getDateFromPeriod,
-  parseLineRanges,
   countLinesInRanges,
   formatCurrency,
-  formatPercentage,
   formatNumber,
-  isValidSha,
+  formatPercentage,
+  getDateFromPeriod,
+  getModelPricing,
   isValidEmail,
+  isValidSha,
+  parseLineRanges,
+  parsePeriod,
 } from "../utils";
 
 // ════════════════════════════════════════════════════════════════
@@ -21,33 +21,33 @@ describe("getModelPricing", () => {
   test("returns pricing for exact model name", () => {
     const pricing = getModelPricing("claude-opus-4-5");
     expect(pricing).toBeDefined();
-    expect(pricing!.model).toBe("claude-opus-4-5");
-    expect(pricing!.inputPerMtok).toBe(15.0);
-    expect(pricing!.outputPerMtok).toBe(75.0);
+    expect(pricing?.model).toBe("claude-opus-4-5");
+    expect(pricing?.inputPerMtok).toBe(15.0);
+    expect(pricing?.outputPerMtok).toBe(75.0);
   });
 
   test("matches case-insensitively", () => {
     const pricing = getModelPricing("Claude-Opus-4-5");
     expect(pricing).toBeDefined();
-    expect(pricing!.model).toBe("claude-opus-4-5");
+    expect(pricing?.model).toBe("claude-opus-4-5");
   });
 
   test("matches substring (model name embedded in longer string)", () => {
     const pricing = getModelPricing("anthropic/claude-sonnet-4-5-latest");
     expect(pricing).toBeDefined();
-    expect(pricing!.model).toBe("claude-sonnet-4-5");
+    expect(pricing?.model).toBe("claude-sonnet-4-5");
   });
 
   test("returns pricing for OpenAI models", () => {
     const pricing = getModelPricing("gpt-4o");
     expect(pricing).toBeDefined();
-    expect(pricing!.inputPerMtok).toBe(2.5);
+    expect(pricing?.inputPerMtok).toBe(2.5);
   });
 
   test("returns pricing for Google models", () => {
     const pricing = getModelPricing("gemini-2.5-pro");
     expect(pricing).toBeDefined();
-    expect(pricing!.inputPerMtok).toBe(1.25);
+    expect(pricing?.inputPerMtok).toBe(1.25);
   });
 
   test("returns undefined for unknown model", () => {

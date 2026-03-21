@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { Users } from "lucide-react";
-import { KpiCard } from "@/components/kpi-card";
 import { AdoptionHeatmap } from "@/components/charts/adoption-heatmap";
-import { LoadingCard } from "@/components/loading-card";
-import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
-import { useTeamStats } from "@/lib/hooks";
+import { ErrorState } from "@/components/error-state";
+import { KpiCard } from "@/components/kpi-card";
+import { LoadingCard } from "@/components/loading-card";
 import {
   Select,
   SelectContent,
@@ -15,6 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useTeamStats } from "@/lib/hooks";
+import { Users } from "lucide-react";
+import { useState } from "react";
 
 export default function TeamPage() {
   const [period, setPeriod] = useState("30d");
@@ -25,9 +25,7 @@ export default function TeamPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Team AI Adoption</h1>
-          <p className="text-muted-foreground">
-            Track AI-generated code across your team
-          </p>
+          <p className="text-muted-foreground">Track AI-generated code across your team</p>
         </div>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger className="w-[140px]">
@@ -59,22 +57,10 @@ export default function TeamPage() {
       ) : data && data.totalCommits > 0 ? (
         <>
           <div className="grid gap-4 md:grid-cols-4">
-            <KpiCard
-              title="AI Adoption"
-              value={`${data.aiPercentage.toFixed(1)}%`}
-            />
-            <KpiCard
-              title="Total Commits"
-              value={data.totalCommits.toLocaleString()}
-            />
-            <KpiCard
-              title="AI Lines"
-              value={data.aiLines.toLocaleString()}
-            />
-            <KpiCard
-              title="Total Spend"
-              value={`$${data.totalCostUsd.toFixed(2)}`}
-            />
+            <KpiCard title="AI Adoption" value={`${data.aiPercentage.toFixed(1)}%`} />
+            <KpiCard title="Total Commits" value={data.totalCommits.toLocaleString()} />
+            <KpiCard title="AI Lines" value={data.aiLines.toLocaleString()} />
+            <KpiCard title="Total Spend" value={`$${data.totalCostUsd.toFixed(2)}`} />
           </div>
 
           {/* Adoption Heatmap */}

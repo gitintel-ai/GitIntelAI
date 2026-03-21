@@ -1,7 +1,7 @@
-import type { Route } from "next";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Github } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 
 export default function MarketingLayout({
   children,
@@ -15,7 +15,7 @@ export default function MarketingLayout({
           <Link href="/" className="flex items-center gap-2">
             <GitBranch className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold tracking-tight">
-              GitIntel<span className="text-muted-foreground font-normal">{" "}AI</span>
+              GitIntel<span className="text-muted-foreground font-normal"> AI</span>
             </span>
           </Link>
 
@@ -84,8 +84,8 @@ export default function MarketingLayout({
                 <span className="font-bold">GitIntel AI</span>
               </Link>
               <p className="mt-3 text-sm text-muted-foreground">
-                Git-native AI adoption tracking, cost intelligence, and context
-                optimization for development teams.
+                Git-native AI adoption tracking, cost intelligence, and context optimization for
+                development teams.
               </p>
             </div>
 
@@ -93,17 +93,26 @@ export default function MarketingLayout({
               <h3 className="text-sm font-semibold">Product</h3>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href="#features"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href="#pricing"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href="#how-it-works"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     How It Works
                   </Link>
                 </li>
@@ -129,12 +138,18 @@ export default function MarketingLayout({
                   </a>
                 </li>
                 <li>
-                  <Link href="/docs/getting-started" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href="/docs/getting-started"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Documentation
                   </Link>
                 </li>
                 <li>
-                  <Link href="/docs/getting-started" className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href="/docs/getting-started"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Getting Started
                   </Link>
                 </li>
@@ -155,17 +170,26 @@ export default function MarketingLayout({
               <h3 className="text-sm font-semibold">Company</h3>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <a href="mailto:hello@gitintel.com" className="text-sm text-muted-foreground hover:text-foreground">
+                  <a
+                    href="mailto:hello@gitintel.com"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Contact
                   </a>
                 </li>
                 <li>
-                  <Link href={"/privacy" as Route} className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href={"/privacy" as Route}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Privacy Policy
                   </Link>
                 </li>
                 <li>
-                  <Link href={"/terms" as Route} className="text-sm text-muted-foreground hover:text-foreground">
+                  <Link
+                    href={"/terms" as Route}
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
                     Terms of Service
                   </Link>
                 </li>

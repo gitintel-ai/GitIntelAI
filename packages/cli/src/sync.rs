@@ -6,7 +6,7 @@ use crate::store::Database;
 use colored::Colorize;
 
 /// Run sync command
-pub async fn run(force: bool, dry_run: bool) -> Result<()> {
+pub async fn run(_force: bool, dry_run: bool) -> Result<()> {
     let config = Config::load()?;
     let db = Database::open()?;
 

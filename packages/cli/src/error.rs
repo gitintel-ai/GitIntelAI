@@ -25,35 +25,14 @@ pub enum GitIntelError {
     #[error("Not a git repository")]
     NotAGitRepo,
 
-    #[error("GitIntel not initialized in this repository. Run 'gitintel init' first.")]
-    NotInitialized,
-
     #[error("Configuration error: {0}")]
     Config(String),
 
     #[error("Invalid line range: {0}")]
     InvalidLineRange(String),
 
-    #[error("File not found: {0}")]
-    FileNotFound(String),
-
     #[error("Invalid time period: {0}")]
     InvalidTimePeriod(String),
-
-    #[error("Sync error: {0}")]
-    Sync(String),
-
-    #[error("Token counting error: {0}")]
-    TokenCount(String),
-
-    #[error("Hook error: {0}")]
-    Hook(String),
-
-    #[error("Network error: {0}")]
-    Network(String),
-
-    #[error("{0}")]
-    Generic(String),
 
     #[error("{0}")]
     Other(String),

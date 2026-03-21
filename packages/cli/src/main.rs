@@ -13,7 +13,6 @@ mod error;
 mod hooks;
 mod init;
 mod known_agents;
-mod otel;
 mod proxy;
 mod scan;
 mod stats;

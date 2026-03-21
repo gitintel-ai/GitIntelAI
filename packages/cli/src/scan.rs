@@ -49,8 +49,9 @@ pub async fn run(
     // Scan for AI-assisted commits
     let ai_commits = trailer_detection::scan_repo(&repo_path, since, limit, branch)?;
 
-    // Store results in SQLite
+    // Store results in SQLite (batched in a single transaction for performance)
     let db = Database::open()?;
+    db.begin_transaction()?;
     for commit in &ai_commits {
         db.insert_scanned_attribution(
             &commit.sha,
@@ -61,6 +62,7 @@ pub async fn run(
             commit.files_changed as i64,
         )?;
     }
+    db.commit_transaction()?;
 
     // Build summary
     let mut agent_map: HashMap<String, AgentBreakdown> = HashMap::new();

@@ -15,12 +15,6 @@ pub fn count_tokens(text: &str) -> Result<usize> {
     }
 }
 
-/// Count tokens in a file
-pub fn count_file_tokens(path: &std::path::Path) -> Result<usize> {
-    let content = std::fs::read_to_string(path)?;
-    count_tokens(&content)
-}
-
 /// Estimate cost for tokens
 pub fn estimate_cost(tokens: usize, model: &str) -> f64 {
     // Per million token pricing

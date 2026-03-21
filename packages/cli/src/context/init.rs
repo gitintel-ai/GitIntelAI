@@ -3,7 +3,6 @@
 use crate::context::{scanner, token_counter};
 use crate::error::Result;
 use colored::Colorize;
-use std::path::Path;
 
 /// Generate CLAUDE.md from repository analysis
 pub async fn run(output: &str, force: bool) -> Result<()> {

@@ -17,7 +17,6 @@ path = "src/main.rs"
 [dependencies]
 # CLI
 clap = { version = "4.5", features = ["derive", "env", "cargo"] }
-clap_complete = "4.5"
 
 # Git
 git2 = { version = "0.19", features = ["vendored-openssl"] }
@@ -31,17 +30,10 @@ serde_json = "1.0"
 serde_yaml = "0.9"
 
 # Async Runtime
-tokio = { version = "1.40", features = ["full"] }
+tokio = { version = "1.40", features = ["rt-multi-thread", "macros", "net", "io-util", "fs"] }
 
-# HTTP (for OTel and sync)
+# HTTP
 reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
-
-# OpenTelemetry
-opentelemetry = { version = "0.26", features = ["metrics"] }
-opentelemetry_sdk = { version = "0.26", features = ["metrics", "rt-tokio"] }
-opentelemetry-otlp = { version = "0.26", features = ["tonic", "metrics"] }
-tonic = "0.12"
-prost = "0.13"
 
 # Token counting
 tiktoken-rs = "0.6"
@@ -55,18 +47,12 @@ dirs = "5.0"
 walkdir = "2.5"
 glob = "0.3"
 colored = "2.1"
-indicatif = "0.17"
-dialoguer = "0.11"
 regex = "1.11"
-lazy_static = "1.5"
-once_cell = "1.20"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tempfile = "3.14"
-sha2 = "0.10"
 hex = "0.4"
 toml = "0.8"
-semver = "1.0"
 
 [dev-dependencies]
 assert_cmd = "2.0"

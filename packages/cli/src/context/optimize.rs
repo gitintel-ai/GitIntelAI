@@ -3,13 +3,11 @@
 use crate::context::token_counter;
 use crate::error::Result;
 use colored::Colorize;
-use std::path::Path;
 
 /// Section with score
 #[derive(Debug)]
 pub struct Section {
     pub name: String,
-    pub content: String,
     pub tokens: usize,
     pub score: f64,
     pub action: SectionAction,
@@ -43,8 +41,6 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
 
     // Calculate optimization
     let mut optimized_tokens = 0;
-    let mut pruned_tokens = 0;
-    let mut compressed_tokens = 0;
 
     for section in &sections {
         match section.action {
@@ -53,11 +49,8 @@ pub async fn run(input: &str, apply: bool) -> Result<()> {
                 // Compress to ~20% of original
                 let compressed = section.tokens / 5;
                 optimized_tokens += compressed;
-                compressed_tokens += section.tokens - compressed;
             }
-            SectionAction::Prune => {
-                pruned_tokens += section.tokens;
-            }
+            SectionAction::Prune => {}
         }
     }
 
@@ -152,7 +145,6 @@ fn parse_sections(content: &str) -> Result<Vec<Section>> {
                 let tokens = token_counter::count_tokens(&current_content)?;
                 sections.push(Section {
                     name: current_name.clone(),
-                    content: current_content.clone(),
                     tokens,
                     score: 0.5, // Default score
                     action: SectionAction::Keep,
@@ -174,7 +166,6 @@ fn parse_sections(content: &str) -> Result<Vec<Section>> {
         let tokens = token_counter::count_tokens(&current_content)?;
         sections.push(Section {
             name: current_name,
-            content: current_content,
             tokens,
             score: 0.5,
             action: SectionAction::Keep,
@@ -244,7 +235,7 @@ fn rand_float() -> f64 {
 
 fn apply_optimizations(content: &str, sections: &[Section]) -> Result<String> {
     let mut result = String::new();
-    let mut current_section: Option<&Section> = None;
+    let mut current_section: Option<&Section>;
     let mut skip_lines = false;
 
     for line in content.lines() {

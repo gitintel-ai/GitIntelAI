@@ -1,7 +1,7 @@
 //! SQLite database operations for GitIntel
 
 use crate::config::get_db_path;
-use crate::error::{GitIntelError, Result};
+use crate::error::Result;
 use chrono::{DateTime, Utc};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
@@ -83,6 +83,19 @@ pub struct ScannedAgentStats {
     pub total_deletions: i64,
     pub total_files_changed: i64,
     pub avg_confidence: f64,
+}
+
+/// Map a database row to a ScannedAttribution struct
+fn row_to_scanned_attribution(row: &rusqlite::Row) -> rusqlite::Result<ScannedAttribution> {
+    Ok(ScannedAttribution {
+        commit_sha: row.get(0)?,
+        agent: row.get(1)?,
+        confidence: row.get(2)?,
+        insertions: row.get(3)?,
+        deletions: row.get(4)?,
+        files_changed: row.get(5)?,
+        scanned_at: row.get(6)?,
+    })
 }
 
 /// Memory record - key-value facts about the codebase
@@ -396,6 +409,18 @@ impl Database {
 
     // ==================== Scanned Attribution Operations ====================
 
+    /// Begin a SQLite transaction (for batch inserts)
+    pub fn begin_transaction(&self) -> Result<()> {
+        self.conn.execute_batch("BEGIN")?;
+        Ok(())
+    }
+
+    /// Commit a SQLite transaction
+    pub fn commit_transaction(&self) -> Result<()> {
+        self.conn.execute_batch("COMMIT")?;
+        Ok(())
+    }
+
     /// Insert a scanned attribution from Co-Authored-By trailer detection
     pub fn insert_scanned_attribution(
         &self,
@@ -432,17 +457,7 @@ impl Database {
         )?;
 
         let attrs = stmt
-            .query_map([], |row| {
-                Ok(ScannedAttribution {
-                    commit_sha: row.get(0)?,
-                    agent: row.get(1)?,
-                    confidence: row.get(2)?,
-                    insertions: row.get(3)?,
-                    deletions: row.get(4)?,
-                    files_changed: row.get(5)?,
-                    scanned_at: row.get(6)?,
-                })
-            })?
+            .query_map([], row_to_scanned_attribution)?
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         Ok(attrs)
@@ -455,17 +470,7 @@ impl Database {
         )?;
 
         let attr = stmt
-            .query_row([commit_sha], |row| {
-                Ok(ScannedAttribution {
-                    commit_sha: row.get(0)?,
-                    agent: row.get(1)?,
-                    confidence: row.get(2)?,
-                    insertions: row.get(3)?,
-                    deletions: row.get(4)?,
-                    files_changed: row.get(5)?,
-                    scanned_at: row.get(6)?,
-                })
-            })
+            .query_row([commit_sha], row_to_scanned_attribution)
             .optional()?;
 
         Ok(attr)
@@ -484,17 +489,7 @@ impl Database {
         )?;
 
         let attrs = stmt
-            .query_map([], |row| {
-                Ok(ScannedAttribution {
-                    commit_sha: row.get(0)?,
-                    agent: row.get(1)?,
-                    confidence: row.get(2)?,
-                    insertions: row.get(3)?,
-                    deletions: row.get(4)?,
-                    files_changed: row.get(5)?,
-                    scanned_at: row.get(6)?,
-                })
-            })?
+            .query_map([], row_to_scanned_attribution)?
             .collect::<std::result::Result<Vec<_>, _>>()?;
 
         Ok(attrs)

@@ -2,7 +2,7 @@
 # Minimal Alpine image with static musl binary.
 
 # ── Builder ───────────────────────────────────────────────────────────────────
-FROM rust:1.82-alpine AS builder
+FROM rust:1.85-alpine AS builder
 
 # musl-dev       — musl libc for static linking
 # openssl-dev    — headers for openssl-sys (git2 vendored-openssl still needs them on Alpine)

@@ -296,6 +296,10 @@ jobs:
     continue-on-error: true  # Non-blocking: requires Cloudflare secrets
     needs: [e2e, e2e-integration]
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -316,13 +320,21 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api-preview.gitintel.com
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_PREVIEW }}
 
+      - name: Prepare static assets for preview
+        run: |
+          mkdir -p /tmp/preview-deploy/_next
+          if [ -d "packages/dashboard/.next/static" ]; then
+            cp -r packages/dashboard/.next/static /tmp/preview-deploy/_next/static
+          fi
+          echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=https://github.com/gitintel-ai/GitIntelAI/pull/${{ github.event.number }}"></head><body>Redirecting to PR...</body></html>' > /tmp/preview-deploy/index.html
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: gitintel-dashboard
-          directory: packages/dashboard/.next
+          directory: /tmp/preview-deploy
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment PR

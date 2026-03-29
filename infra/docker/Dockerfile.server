@@ -16,7 +16,8 @@ COPY packages/dashboard/package.json ./packages/dashboard/package.json
 COPY packages/cli-npm/package.json   ./packages/cli-npm/package.json
 
 # Bun hoists everything to root node_modules
-RUN bun install --frozen-lockfile
+# --ignore-scripts: cli-npm postinstall downloads platform binary, not needed in server image
+RUN bun install --frozen-lockfile --ignore-scripts
 
 # ── Runtime ───────────────────────────────────────────────────────────────────
 FROM oven/bun:1.2-alpine AS runner

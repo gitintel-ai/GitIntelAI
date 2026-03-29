@@ -395,7 +395,7 @@ export default function LandingPage() {
                 <div className="h-3 w-3 rounded-full bg-green-500" />
                 <span className="ml-2 text-xs text-muted-foreground">terminal</span>
               </div>
-              <div className="bg-[hsl(222,84%,4.9%)] p-6 font-mono text-sm leading-relaxed text-[hsl(210,40%,98%)]">
+              <div className="overflow-x-auto bg-[hsl(222,84%,4.9%)] p-4 sm:p-6 font-mono text-xs sm:text-sm leading-relaxed text-[hsl(210,40%,98%)]">
                 <p>
                   <span className="text-green-400">$</span> gitintel stats
                 </p>
@@ -544,7 +544,7 @@ export default function LandingPage() {
                   <h3 className="text-xl font-semibold">{step.title}</h3>
                 </div>
                 <p className="mb-4 text-sm text-muted-foreground">{step.description}</p>
-                <div className="overflow-hidden rounded-md border bg-[hsl(222,84%,4.9%)] px-4 py-3 font-mono text-sm text-[hsl(210,40%,98%)]">
+                <div className="overflow-x-auto rounded-md border bg-[hsl(222,84%,4.9%)] px-4 py-3 font-mono text-xs sm:text-sm text-[hsl(210,40%,98%)]">
                   <span className="text-green-400">$</span> {step.code}
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function LandingPage() {
               See how GitIntel AI stacks up against other approaches to AI code tracking.
             </p>
           </div>
-          <div className="mx-auto mt-14 max-w-4xl">
+          <div className="mx-auto mt-14 max-w-4xl overflow-x-auto">
             <Card>
               <CardContent className="p-0">
                 <Table>
@@ -712,14 +712,14 @@ export default function LandingPage() {
               </Button>
             </div>
             <div className="mt-6 flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
-              <div className="inline-flex items-center gap-2 rounded-lg border bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
-                <span className="text-green-600 dark:text-green-400">$</span>
-                <span>curl -fsSL https://gitintel.com/install | sh</span>
+              <div className="flex max-w-full items-center gap-2 overflow-x-auto rounded-lg border bg-muted px-3 py-2 font-mono text-xs sm:text-sm text-muted-foreground">
+                <span className="shrink-0 text-green-600 dark:text-green-400">$</span>
+                <span className="whitespace-nowrap">curl -fsSL https://gitintel.com/install | sh</span>
               </div>
               <span className="text-xs text-muted-foreground">or</span>
-              <div className="inline-flex items-center gap-2 rounded-lg border bg-muted px-4 py-2 font-mono text-sm text-muted-foreground">
-                <span className="text-green-600 dark:text-green-400">$</span>
-                <span>npm install -g @gitintel-cli/gitintel</span>
+              <div className="flex max-w-full items-center gap-2 overflow-x-auto rounded-lg border bg-muted px-3 py-2 font-mono text-xs sm:text-sm text-muted-foreground">
+                <span className="shrink-0 text-green-600 dark:text-green-400">$</span>
+                <span className="whitespace-nowrap">npm install -g @gitintel-cli/gitintel</span>
               </div>
             </div>
           </div>

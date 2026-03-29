@@ -153,15 +153,23 @@ No cloud. No vendor lock-in. Your attribution data lives in the repo itself.
 
 ## Why GitIntel vs Alternatives
 
-| | GitIntel | usegitai.com | Manual tracking |
-|---|:---:|:---:|:---:|
-| Works offline | Yes | No | Yes |
-| Open standard (git refs) | Yes | No | No |
-| All agents supported | Yes | Claude only | N/A |
-| Self-hostable | Yes | No | N/A |
-| Line-level attribution | Yes | Unknown | No |
-| Cost tracking | Yes | No | No |
-| Open source | MIT | No | N/A |
+<!-- Verified 2026-03-29. Sources: usegitai.com, agent-trace.dev, archipelo.com -->
+
+| | GitIntel | git-ai | Agent Trace | Manual |
+|---|:---:|:---:|:---:|:---:|
+| Works offline | Yes | Yes | N/A (spec) | Yes |
+| Open standard (git refs) | `refs/ai/authorship` | Git Notes | JSON trace records | No |
+| All agents supported | Yes (any) | Yes (12+) | Spec-level | N/A |
+| Self-hostable | Yes | Yes | N/A | N/A |
+| Line-level attribution | Yes | Yes | Spec-level | No |
+| Cost tracking ($/commit) | Yes | No | No | No |
+| Survives rebase/cherry-pick | No | Yes | Unresolved | No |
+| Standalone tool | Yes | Yes | No (spec only) | N/A |
+| Open source | MIT | Apache 2.0 | CC BY 4.0 | N/A |
+
+**git-ai** ([usegitai.com](https://usegitai.com)) — open-source CLI (1.4k stars) with IDE extensions for VS Code, Cursor, Windsurf. Agent-reported hooks, `ai blame`, `/ask` to query the original AI about code it wrote.
+
+**Agent Trace** ([agent-trace.dev](https://agent-trace.dev)) — open specification (v0.1.0 RFC) by Cursor & Cognition AI, backed by Cloudflare, Vercel, Google Jules, Amp. Defines a JSON format for attribution metadata. git-ai implements this spec.
 
 ## Supported Agents
 

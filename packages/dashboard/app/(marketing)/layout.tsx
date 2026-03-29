@@ -1,13 +1,27 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { GitBranch, Github } from "lucide-react";
+import { GitBranch, Github, Menu, X } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+
+const navLinks = [
+  { href: "#features", label: "Features" },
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "#pricing", label: "Pricing" },
+  { href: "#faq", label: "FAQ" },
+  { href: "/docs/getting-started", label: "Docs" },
+  { href: "/blog", label: "Blog" },
+];
 
 export default function MarketingLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -20,42 +34,21 @@ export default function MarketingLayout({
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
-            <Link
-              href="#features"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Features
-            </Link>
-            <Link
-              href="#how-it-works"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              How It Works
-            </Link>
-            <Link
-              href="#pricing"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="#faq"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/docs/getting-started"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Docs
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex">
               <a
-                href="https://github.com/gitintel/gitintel"
+                href="https://github.com/gitintel-ai/GitIntelAI"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -63,14 +56,53 @@ export default function MarketingLayout({
                 <span className="hidden sm:inline">GitHub</span>
               </a>
             </Button>
-            <Button variant="outline" size="sm" asChild>
+            <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
               <Link href={"/sign-in" as Route}>Sign In</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href={"/sign-up" as Route}>Get Started</Link>
             </Button>
+            <button
+              className="ml-1 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </nav>
+
+        {mobileMenuOpen && (
+          <div className="border-t bg-background px-4 pb-4 pt-2 md:hidden">
+            <div className="flex flex-col space-y-3">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <div className="flex items-center gap-2 border-t pt-3">
+                <Button variant="ghost" size="sm" asChild>
+                  <a
+                    href="https://github.com/gitintel-ai/GitIntelAI"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="h-4 w-4" />
+                    GitHub
+                  </a>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href={"/sign-in" as Route}>Sign In</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-1">{children}</main>
@@ -93,33 +125,16 @@ export default function MarketingLayout({
               <h3 className="text-sm font-semibold">Product</h3>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <Link
-                    href="#features"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Features
-                  </Link>
+                  <Link href="#features" className="text-sm text-muted-foreground hover:text-foreground">Features</Link>
                 </li>
                 <li>
-                  <Link
-                    href="#pricing"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Pricing
-                  </Link>
+                  <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground">Pricing</Link>
                 </li>
                 <li>
-                  <Link
-                    href="#how-it-works"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    How It Works
-                  </Link>
+                  <Link href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground">How It Works</Link>
                 </li>
                 <li>
-                  <Link href="#faq" className="text-sm text-muted-foreground hover:text-foreground">
-                    FAQ
-                  </Link>
+                  <Link href="#faq" className="text-sm text-muted-foreground hover:text-foreground">FAQ</Link>
                 </li>
               </ul>
             </div>
@@ -128,40 +143,16 @@ export default function MarketingLayout({
               <h3 className="text-sm font-semibold">Resources</h3>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <a
-                    href="https://github.com/gitintel/gitintel"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    GitHub
-                  </a>
+                  <a href="https://github.com/gitintel-ai/GitIntelAI" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground">GitHub</a>
                 </li>
                 <li>
-                  <Link
-                    href="/docs/getting-started"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Documentation
-                  </Link>
+                  <Link href="/docs/getting-started" className="text-sm text-muted-foreground hover:text-foreground">Documentation</Link>
                 </li>
                 <li>
-                  <Link
-                    href="/docs/getting-started"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Getting Started
-                  </Link>
+                  <Link href={"/blog" as Route} className="text-sm text-muted-foreground hover:text-foreground">Blog</Link>
                 </li>
                 <li>
-                  <a
-                    href="https://github.com/gitintel/gitintel/blob/main/specs/02-attribution-std.md"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Attribution Standard
-                  </a>
+                  <a href="https://github.com/gitintel-ai/GitIntelAI/blob/main/specs/02-attribution-std.md" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground">Attribution Standard</a>
                 </li>
               </ul>
             </div>
@@ -170,28 +161,13 @@ export default function MarketingLayout({
               <h3 className="text-sm font-semibold">Company</h3>
               <ul className="mt-3 space-y-2">
                 <li>
-                  <a
-                    href="mailto:hello@gitintel.com"
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Contact
-                  </a>
+                  <a href="mailto:hello@gitintel.com" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
                 </li>
                 <li>
-                  <Link
-                    href={"/privacy" as Route}
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Privacy Policy
-                  </Link>
+                  <Link href={"/privacy" as Route} className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link>
                 </li>
                 <li>
-                  <Link
-                    href={"/terms" as Route}
-                    className="text-sm text-muted-foreground hover:text-foreground"
-                  >
-                    Terms of Service
-                  </Link>
+                  <Link href={"/terms" as Route} className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link>
                 </li>
               </ul>
             </div>

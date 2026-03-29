@@ -39,7 +39,7 @@ export default function MarketingLayout({
             {navLinks.map((link) => (
               <Link
                 key={link.href}
-                href={link.href}
+                href={href(link.href)}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 {link.label}
@@ -80,7 +80,7 @@ export default function MarketingLayout({
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
-                  href={link.href}
+                  href={href(link.href)}
                   className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                   onClick={() => setMobileMenuOpen(false)}
                 >

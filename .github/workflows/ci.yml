@@ -296,6 +296,10 @@ jobs:
     continue-on-error: true  # Non-blocking: requires Cloudflare secrets
     needs: [e2e, e2e-integration]
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4

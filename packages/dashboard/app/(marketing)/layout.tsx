@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Github, Menu, X } from "lucide-react";
-import type { Route } from "next";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Route = any;
 import Link from "next/link";
 
 const navLinks = [

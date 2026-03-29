@@ -322,9 +322,10 @@ jobs:
 
       - name: Prepare static assets for preview
         run: |
-          # Cloudflare Pages has 26MB file limit — deploy only static assets for preview
-          mkdir -p /tmp/preview-deploy
-          cp -r packages/dashboard/.next/static /tmp/preview-deploy/_next/static
+          mkdir -p /tmp/preview-deploy/_next
+          if [ -d "packages/dashboard/.next/static" ]; then
+            cp -r packages/dashboard/.next/static /tmp/preview-deploy/_next/static
+          fi
           echo '<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=https://github.com/gitintel-ai/GitIntelAI/pull/${{ github.event.number }}"></head><body>Redirecting to PR...</body></html>' > /tmp/preview-deploy/index.html
 
       - name: Deploy to Cloudflare Pages

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { GitBranch, Github, Menu, X } from "lucide-react";
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Route = any;
 import Link from "next/link";
 
 const navLinks = [
@@ -58,10 +56,10 @@ export default function MarketingLayout({
               </a>
             </Button>
             <Button variant="outline" size="sm" asChild className="hidden sm:inline-flex">
-              <Link href={"/sign-in" as Route}>Sign In</Link>
+              <Link href={"/sign-in"}>Sign In</Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href={"/sign-up" as Route}>Get Started</Link>
+              <Link href={"/sign-up"}>Get Started</Link>
             </Button>
             <button
               className="ml-1 inline-flex items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
@@ -98,7 +96,7 @@ export default function MarketingLayout({
                   </a>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
-                  <Link href={"/sign-in" as Route}>Sign In</Link>
+                  <Link href={"/sign-in"}>Sign In</Link>
                 </Button>
               </div>
             </div>
@@ -150,7 +148,7 @@ export default function MarketingLayout({
                   <Link href="/docs/getting-started" className="text-sm text-muted-foreground hover:text-foreground">Documentation</Link>
                 </li>
                 <li>
-                  <Link href={"/blog" as Route} className="text-sm text-muted-foreground hover:text-foreground">Blog</Link>
+                  <Link href={"/blog"} className="text-sm text-muted-foreground hover:text-foreground">Blog</Link>
                 </li>
                 <li>
                   <a href="https://github.com/gitintel-ai/GitIntelAI/blob/main/specs/02-attribution-std.md" target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-foreground">Attribution Standard</a>
@@ -165,10 +163,10 @@ export default function MarketingLayout({
                   <a href="mailto:hello@gitintel.com" className="text-sm text-muted-foreground hover:text-foreground">Contact</a>
                 </li>
                 <li>
-                  <Link href={"/privacy" as Route} className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link>
+                  <Link href={"/privacy"} className="text-sm text-muted-foreground hover:text-foreground">Privacy Policy</Link>
                 </li>
                 <li>
-                  <Link href={"/terms" as Route} className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link>
+                  <Link href={"/terms"} className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link>
                 </li>
               </ul>
             </div>

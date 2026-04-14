@@ -190,3 +190,45 @@ Memory Store (MCP-compatible):
   - Facts auto-expire when use_count = 0 for 30 days
   - Exportable as CLAUDE.md section or MCP memory tool
 ```
+
+## Sync Contract (CLI ↔ Server ↔ Dashboard)
+
+The four storage surfaces each have a defined role. Sync between them is one-directional and eventually consistent.
+
+### Authoritative data stores
+
+| Store | Location | Authoritative for |
+|-------|----------|-------------------|
+| Git notes (`refs/ai/authorship/*`) | Local repo, pushed/fetched with `git push/fetch` | Attribution metadata that must travel with the repo |
+| SQLite (`~/.gitintel/gitintel.db`) | Local developer machine | Cost sessions, commit cache, cumulative stats, context memory |
+| PostgreSQL (team server) | Self-hosted or cloud | Team roll-up, RBAC, audit log, alerts, webhooks |
+| ClickHouse (team server) | Self-hosted or cloud | Analytics queries, time-series aggregates for dashboard |
+
+### Sync direction (strict)
+
+```
+  Git notes  ──┐
+               ├──► SQLite (authoritative locally)
+  OTel metrics ┘
+                        │
+                        ▼ (opt-in, via `gitintel sync push`)
+                   PostgreSQL  ◄────►  ClickHouse (CDC)
+                        │
+                        ▼
+                    Dashboard (read-only view)
+```
+
+- **Git notes → SQLite**: on every `git commit` hook and on `gitintel scan`. Notes are the source of truth for attribution; SQLite is a cached, queryable view.
+- **SQLite → Server**: only when the user opts in via `gitintel sync push` or by setting `sync.auto_push = true` in `~/.gitintel/config.yaml`. Nothing leaves the machine by default.
+- **Server → Dashboard**: read-only. The dashboard never writes back into PostgreSQL.
+
+### Conflict model
+
+- SQLite never overwrites git notes. If a note differs from the cached row, the note wins and SQLite is re-derived on next `gitintel scan`.
+- Server-side data is a projection of pushed SQLite rows. Deleting server data does not affect local state.
+- Multiple developers writing to the same repo: each developer's `refs/ai/authorship/<their-id>/` namespace is isolated. Merging commits combines namespaces.
+
+### Why this shape
+
+Local-first is a product promise, not just an architectural preference. The CLI must be fully useful without the server. The server exists to answer team-scale questions (multi-repo roll-up, audit, alerts) that don't make sense on a single developer's laptop. The dashboard is a lens on that team data — never a required dependency.
+

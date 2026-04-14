@@ -3,6 +3,7 @@
 use crate::config::Config;
 use crate::error::{GitIntelError, Result};
 use crate::hooks::post_commit::AuthorshipLog;
+use crate::pricing;
 use crate::store::Database;
 use chrono::{Duration, Utc};
 use colored::Colorize;
@@ -386,4 +387,7 @@ fn print_text_cost(summary: &CostSummary) {
         summary.ai_percentage
     );
     println!("{}", "─".repeat(50));
+
+    // Accuracy disclaimer — call it out so estimates are read as estimates.
+    println!("{} {}", "ⓘ".cyan(), pricing::disclaimer().dimmed());
 }

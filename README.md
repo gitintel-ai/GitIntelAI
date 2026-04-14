@@ -184,9 +184,21 @@ GitIntel is vendor-agnostic. `--agent` is a free-form string -- any agent works:
 - **Windsurf / Codeium** -- manual checkpoint
 - **Any custom agent** -- just pass `--agent "your-agent"`
 
-## Enterprise
+## Release Scope (v0.1.0-beta)
 
-GitIntel ships with enterprise features from day one: self-hosted deployment via Docker Compose and Kubernetes (Helm), SAML/OIDC SSO (Okta, Azure AD, any SAML 2.0 IdP), SCIM 2.0 user provisioning, RBAC with 5 configurable roles, full audit logging, air-gapped deployment support, and compliance report export for SOC2/ISO 27001 audits.
+| Surface | Status | Notes |
+|---------|--------|-------|
+| `gitintel` CLI (Rust) | **GA** | Fully tested, stable CLI surface, semver-guaranteed from this release |
+| `refs/ai/authorship/*` format | **GA** | Stable schema — readable without the CLI, forward-compatible |
+| `@gitintel/core` package | Preview | Shared types — API may shift through 0.2 |
+| Dashboard (Next.js) | Preview | Functional but light on tests — use at your own pace |
+| Server (Bun + Hono) | Preview | SCIM / RBAC / audit are implemented but not load-tested |
+
+The CLI is the product. The server and dashboard are optional team-rollup surfaces that ride alongside — if you just want the CLI, ignore everything in `packages/server` and `packages/dashboard`.
+
+## Enterprise (Preview)
+
+GitIntel includes early-stage self-hosted components for teams: Docker Compose + Kubernetes (Helm), SAML/OIDC SSO, SCIM 2.0, RBAC with 5 roles, audit log, air-gapped deployment, and SOC2/ISO 27001 report export. These ship in the monorepo as **Preview** — functional against the reference deployment but not yet through a production load test. Run them in a staging environment first.
 
 ## Roadmap
 

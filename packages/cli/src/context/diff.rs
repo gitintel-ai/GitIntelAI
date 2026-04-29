@@ -3,6 +3,7 @@
 use crate::context::token_counter;
 use crate::error::Result;
 use colored::Colorize;
+use std::cmp::Reverse;
 
 /// Show token diff report
 pub async fn run(input: &str) -> Result<()> {
@@ -53,7 +54,7 @@ pub async fn run(input: &str) -> Result<()> {
     }
 
     // Sort by token count descending
-    section_tokens.sort_by(|a, b| b.1.cmp(&a.1));
+    section_tokens.sort_by_key(|(_, tokens)| Reverse(*tokens));
 
     // Display
     for (name, tokens) in &section_tokens {

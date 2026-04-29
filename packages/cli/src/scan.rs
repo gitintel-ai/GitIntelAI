@@ -8,6 +8,7 @@ use crate::store::Database;
 use crate::trailer_detection;
 use colored::Colorize;
 use serde::Serialize;
+use std::cmp::Reverse;
 use std::collections::HashMap;
 
 /// Summary of a repository scan
@@ -90,7 +91,7 @@ pub async fn run(
     }
 
     let mut by_agent: Vec<AgentBreakdown> = agent_map.into_values().collect();
-    by_agent.sort_by(|a, b| b.commits.cmp(&a.commits));
+    by_agent.sort_by_key(|a| Reverse(a.commits));
 
     let ai_count = ai_commits.len();
     let ai_pct = if total_scanned > 0 {

@@ -1,5 +1,9 @@
 name: CI
 
+# Gated by repo variable CI_ENABLED. Off by default — GitHub Actions billing
+# is paused, so scripts/local-ci.sh is the source of truth. Flip
+# vars.CI_ENABLED to 'true' (Settings → Variables) to re-enable.
+
 on:
   push:
     branches: [main, develop]
@@ -16,6 +20,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   cli:
     name: CLI Tests
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -57,6 +62,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   server:
     name: Server Tests
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     services:
@@ -105,6 +111,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   dashboard:
     name: Dashboard Build
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -140,6 +147,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   e2e:
     name: Dashboard E2E
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -193,6 +201,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   e2e-integration:
     name: Integration E2E
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     services:
@@ -268,6 +277,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   core:
     name: Core Library
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -295,7 +305,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # Non-blocking: requires Cloudflare secrets
     needs: [e2e, e2e-integration]
-    if: github.event_name == 'pull_request'
+    if: ${{ vars.CI_ENABLED == 'true' && github.event_name == 'pull_request' }}
     permissions:
       contents: read
       deployments: write
@@ -353,6 +363,7 @@ jobs:
   # ════════════════════════════════════════════════════════════════
   docker:
     name: Docker Build
+    if: ${{ vars.CI_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # Non-blocking: Docker/musl build issues to fix separately
     needs: [cli, server, dashboard, e2e, e2e-integration, core]

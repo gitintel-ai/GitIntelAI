@@ -172,6 +172,20 @@ export default function MarketingLayout({
                   <Link href={href("/terms")} className="text-sm text-muted-foreground hover:text-foreground">Terms of Service</Link>
                 </li>
               </ul>
+
+              <h3 className="mt-6 text-sm font-semibold">Tools we use</h3>
+              <ul className="mt-3 space-y-2">
+                <li>
+                  <a
+                    href="https://pdfmavericks.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    PDF Mavericks — fast, private PDF tools
+                  </a>
+                </li>
+              </ul>
             </div>
           </div>
 

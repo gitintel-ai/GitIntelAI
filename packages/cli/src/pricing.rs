@@ -152,13 +152,24 @@ pub fn estimate_cost_combined(tokens: usize, model: &str) -> f64 {
 }
 
 fn lookup_model<'a>(table: &'a PricingTable, model: &str) -> &'a ModelPricing {
-    let lower = model.to_lowercase();
-    for (key, pricing) in &table.models {
-        if lower.contains(&key.to_lowercase()) {
-            return pricing;
+    table.lookup(model)
+}
+
+impl PricingTable {
+    /// Look up pricing for a model by case-insensitive substring match
+    /// against the table keys. Falls back to `self.default` if no key
+    /// matches. Exposed publicly so callers (e.g. `session_reader::types`)
+    /// can run their own per-call math instead of going through the
+    /// `estimate_cost_*` helpers.
+    pub fn lookup(&self, model: &str) -> &ModelPricing {
+        let lower = model.to_lowercase();
+        for (key, pricing) in &self.models {
+            if lower.contains(&key.to_lowercase()) {
+                return pricing;
+            }
         }
+        &self.default
     }
-    &table.default
 }
 
 /// Return a short disclaimer string suitable for appending to CLI output.

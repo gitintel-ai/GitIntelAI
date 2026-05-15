@@ -11,7 +11,13 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::process::Command;
 
-/// Cost summary output
+/// Cost summary output.
+///
+/// `measured_cost_usd` / `measured_sessions` are populated when the session
+/// reader has enriched `cost_sessions` rows linked to this commit (or to
+/// commits in the period for aggregate queries). `None` means no measured
+/// signal exists yet; callers should fall back to `total_cost_usd` for
+/// display. Yield breakdown is per-session, not per-line.
 #[derive(Debug, Serialize)]
 pub struct CostSummary {
     pub period: Option<String>,
@@ -25,6 +31,28 @@ pub struct CostSummary {
     pub ai_lines: i64,
     pub total_lines: i64,
     pub ai_percentage: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub measured_cost_usd: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub measured_sessions: Option<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub yield_breakdown: Option<YieldBreakdown>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub by_category: Vec<CategoryCost>,
+}
+
+#[derive(Debug, Serialize, Default)]
+pub struct YieldBreakdown {
+    pub productive: usize,
+    pub reverted: usize,
+    pub abandoned: usize,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CategoryCost {
+    pub category: String,
+    pub cost_usd: f64,
+    pub sessions: usize,
 }
 
 #[derive(Debug, Serialize)]
@@ -90,6 +118,10 @@ fn get_commit_cost(db: &Database, sha: &str) -> Result<CostSummary> {
         ai_lines: 0,
         total_lines: 0,
         ai_percentage: 0.0,
+        measured_cost_usd: None,
+        measured_sessions: None,
+        yield_breakdown: None,
+        by_category: Vec::new(),
     };
 
     if let Some(a) = attr {
@@ -107,11 +139,61 @@ fn get_commit_cost(db: &Database, sha: &str) -> Result<CostSummary> {
     // Aggregate by model and agent
     let mut model_costs: HashMap<String, f64> = HashMap::new();
     let mut agent_costs: HashMap<String, f64> = HashMap::new();
+    let mut category_costs: HashMap<String, (f64, usize)> = HashMap::new();
+    let mut measured_cost = 0f64;
+    let mut measured_count = 0usize;
+    let mut yields = YieldBreakdown::default();
+    let mut saw_yield = false;
 
-    for session in sessions {
+    for session in &sessions {
         *model_costs.entry(session.model.clone()).or_insert(0.0) += session.cost_usd;
         *agent_costs.entry(session.agent.clone()).or_insert(0.0) += session.cost_usd;
+        if session.is_measured {
+            let v = session.measured_cost_usd.unwrap_or(session.cost_usd);
+            measured_cost += v;
+            measured_count += 1;
+        }
+        if let Some(cat) = &session.category {
+            let entry = category_costs.entry(cat.clone()).or_insert((0.0, 0));
+            entry.0 += session.cost_usd;
+            entry.1 += 1;
+        }
+        match session.yield_outcome.as_deref() {
+            Some("productive") => {
+                yields.productive += 1;
+                saw_yield = true;
+            }
+            Some("reverted") => {
+                yields.reverted += 1;
+                saw_yield = true;
+            }
+            Some("abandoned") => {
+                yields.abandoned += 1;
+                saw_yield = true;
+            }
+            _ => {}
+        }
     }
+
+    if measured_count > 0 {
+        summary.measured_cost_usd = Some(measured_cost);
+        summary.measured_sessions = Some(measured_count);
+    }
+    if saw_yield {
+        summary.yield_breakdown = Some(yields);
+    }
+    for (cat, (cost, n)) in category_costs {
+        summary.by_category.push(CategoryCost {
+            category: cat,
+            cost_usd: cost,
+            sessions: n,
+        });
+    }
+    summary.by_category.sort_by(|a, b| {
+        b.cost_usd
+            .partial_cmp(&a.cost_usd)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
 
     for (model, cost) in model_costs {
         let pct = if summary.total_cost_usd > 0.0 {
@@ -163,6 +245,10 @@ fn get_branch_cost(db: &Database, config: &Config, branch: &str) -> Result<CostS
         ai_lines: 0,
         total_lines: 0,
         ai_percentage: 0.0,
+        measured_cost_usd: None,
+        measured_sessions: None,
+        yield_breakdown: None,
+        by_category: Vec::new(),
     };
 
     for sha in commits {
@@ -199,6 +285,10 @@ fn get_developer_cost(db: &Database, developer: &str, since: Option<&str>) -> Re
         ai_lines: 0,
         total_lines: 0,
         ai_percentage: 0.0,
+        measured_cost_usd: None,
+        measured_sessions: None,
+        yield_breakdown: None,
+        by_category: Vec::new(),
     };
 
     let mut model_costs: HashMap<String, f64> = HashMap::new();
@@ -247,6 +337,10 @@ fn get_period_cost(db: &Database, period: &str) -> Result<CostSummary> {
         ai_lines: 0,
         total_lines: 0,
         ai_percentage: 0.0,
+        measured_cost_usd: None,
+        measured_sessions: None,
+        yield_breakdown: None,
+        by_category: Vec::new(),
     };
 
     let mut model_costs: HashMap<String, f64> = HashMap::new();
@@ -386,6 +480,51 @@ fn print_text_cost(summary: &CostSummary) {
         summary.total_lines,
         summary.ai_percentage
     );
+    println!("{}", "─".repeat(50));
+
+    // Measured-cost summary (session_reader enrichment) — only printed when
+    // we have at least one measured session linked to this view.
+    if let (Some(measured), Some(count)) = (summary.measured_cost_usd, summary.measured_sessions) {
+        let total = summary.total_cost_usd;
+        let pct = if total > 0.0 {
+            (measured / total) * 100.0
+        } else {
+            0.0
+        };
+        println!();
+        println!("{}", "Measured (session reader):".bold());
+        println!(
+            "  Cost:     {} across {} session{} ({:.1}% of total)",
+            format!("${:.4}", measured).green(),
+            count.to_string().cyan(),
+            if count == 1 { "" } else { "s" },
+            pct
+        );
+    }
+    if let Some(y) = &summary.yield_breakdown {
+        let total = y.productive + y.reverted + y.abandoned;
+        if total > 0 {
+            println!(
+                "  Yield:    {} productive · {} reverted · {} abandoned",
+                y.productive.to_string().green(),
+                y.reverted.to_string().yellow(),
+                y.abandoned.to_string().dimmed(),
+            );
+        }
+    }
+    if !summary.by_category.is_empty() {
+        println!("{}", "  Top categories:".dimmed());
+        for cat in summary.by_category.iter().take(3) {
+            println!(
+                "    {} — ${:.4} ({} session{})",
+                cat.category.cyan(),
+                cat.cost_usd,
+                cat.sessions,
+                if cat.sessions == 1 { "" } else { "s" }
+            );
+        }
+    }
+
     println!("{}", "─".repeat(50));
 
     // Accuracy disclaimer — call it out so estimates are read as estimates.

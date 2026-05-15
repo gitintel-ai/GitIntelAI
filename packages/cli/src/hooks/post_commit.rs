@@ -216,6 +216,24 @@ pub async fn run() -> Result<()> {
     // Clear processed checkpoints
     db.clear_checkpoints()?;
 
+    // Session-reader enrichment: scan provider session files, write measured
+    // cost / category / yield rows to cost_sessions linked to this commit.
+    // Errors are logged inside; failures here must never break the commit.
+    if let Ok(repo_path) = std::env::current_dir() {
+        let commit_ts = chrono::DateTime::parse_from_rfc3339(&log.timestamp)
+            .map(|dt| dt.with_timezone(&Utc))
+            .unwrap_or_else(|_| Utc::now());
+        let matched =
+            crate::session_reader::enrich_for_commit(&db, &repo_path, &commit_sha, commit_ts);
+        if matched > 0 {
+            tracing::debug!(
+                commit = %commit_sha,
+                matched,
+                "session_reader: enriched cost_sessions"
+            );
+        }
+    }
+
     // Print summary
     println!(
         "{} Commit: {}% AI ({}) | {}% Human | Cost: ${:.4}",

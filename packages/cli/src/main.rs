@@ -16,6 +16,7 @@ mod known_agents;
 mod pricing;
 mod proxy;
 mod scan;
+mod session_reader;
 mod stats;
 mod status;
 mod store;

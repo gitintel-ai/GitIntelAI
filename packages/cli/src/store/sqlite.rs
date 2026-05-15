@@ -46,7 +46,13 @@ pub struct Attribution {
     pub log_json: String,
 }
 
-/// Cost session record - OTel session data linked to commits
+/// Cost session record - OTel session data linked to commits.
+///
+/// Measured-cost columns (`is_measured`, `measured_cost_usd`, `category`,
+/// `one_shot_rate`, `yield_outcome`) are populated by the session_reader
+/// during post-commit enrichment. When `is_measured = false`, treat
+/// `cost_usd` as the caller-supplied estimate; when `true`, prefer
+/// `measured_cost_usd` for reporting.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CostSession {
     pub session_id: String,
@@ -60,6 +66,11 @@ pub struct CostSession {
     pub tokens_out: i64,
     pub tokens_cache: i64,
     pub cost_usd: f64,
+    pub is_measured: bool,
+    pub measured_cost_usd: Option<f64>,
+    pub category: Option<String>,
+    pub one_shot_rate: Option<f64>,
+    pub yield_outcome: Option<String>,
 }
 
 /// Scanned attribution record - from Co-Authored-By trailer detection
@@ -168,17 +179,22 @@ impl Database {
 
             -- Cost sessions
             CREATE TABLE IF NOT EXISTS cost_sessions (
-                session_id      TEXT PRIMARY KEY,
-                commit_sha      TEXT,
-                agent           TEXT NOT NULL,
-                model           TEXT NOT NULL,
-                project_path    TEXT NOT NULL,
-                started_at      TEXT NOT NULL,
-                ended_at        TEXT,
-                tokens_in       INTEGER DEFAULT 0,
-                tokens_out      INTEGER DEFAULT 0,
-                tokens_cache    INTEGER DEFAULT 0,
-                cost_usd        REAL DEFAULT 0.0
+                session_id        TEXT PRIMARY KEY,
+                commit_sha        TEXT,
+                agent             TEXT NOT NULL,
+                model             TEXT NOT NULL,
+                project_path      TEXT NOT NULL,
+                started_at        TEXT NOT NULL,
+                ended_at          TEXT,
+                tokens_in         INTEGER DEFAULT 0,
+                tokens_out        INTEGER DEFAULT 0,
+                tokens_cache      INTEGER DEFAULT 0,
+                cost_usd          REAL DEFAULT 0.0,
+                is_measured       INTEGER NOT NULL DEFAULT 0,
+                measured_cost_usd REAL,
+                category          TEXT,
+                one_shot_rate     REAL,
+                yield_outcome     TEXT
             );
 
             -- Memory store
@@ -216,6 +232,7 @@ impl Database {
             CREATE INDEX IF NOT EXISTS idx_attributions_date ON attributions(authored_at);
             CREATE INDEX IF NOT EXISTS idx_cost_sessions_commit ON cost_sessions(commit_sha);
             CREATE INDEX IF NOT EXISTS idx_cost_sessions_started ON cost_sessions(started_at);
+            CREATE INDEX IF NOT EXISTS idx_cost_sessions_measured ON cost_sessions(is_measured);
             CREATE INDEX IF NOT EXISTS idx_memory_category ON memory(category);
             CREATE INDEX IF NOT EXISTS idx_memory_last_used ON memory(last_used_at);
             CREATE INDEX IF NOT EXISTS idx_scanned_agent ON scanned_attributions(agent);
@@ -223,6 +240,34 @@ impl Database {
             "#,
         )?;
 
+        // Idempotent column adds for users upgrading from a pre-session-reader
+        // database. SQLite ignores ALTER TABLE ADD COLUMN errors via the
+        // ad-hoc check below.
+        self.add_column_if_missing("cost_sessions", "is_measured", "INTEGER NOT NULL DEFAULT 0")?;
+        self.add_column_if_missing("cost_sessions", "measured_cost_usd", "REAL")?;
+        self.add_column_if_missing("cost_sessions", "category", "TEXT")?;
+        self.add_column_if_missing("cost_sessions", "one_shot_rate", "REAL")?;
+        self.add_column_if_missing("cost_sessions", "yield_outcome", "TEXT")?;
+
+        Ok(())
+    }
+
+    /// Add a column to a table only if it does not already exist. SQLite has
+    /// no `IF NOT EXISTS` clause for `ALTER TABLE ADD COLUMN`, so this checks
+    /// `PRAGMA table_info` first.
+    fn add_column_if_missing(&self, table: &str, column: &str, type_decl: &str) -> Result<()> {
+        let pragma = format!("PRAGMA table_info({table})");
+        let mut stmt = self.conn.prepare(&pragma)?;
+        let cols: Vec<String> = stmt
+            .query_map([], |row| row.get::<_, String>(1))?
+            .filter_map(|r| r.ok())
+            .collect();
+        if !cols.iter().any(|c| c == column) {
+            self.conn.execute(
+                &format!("ALTER TABLE {table} ADD COLUMN {column} {type_decl}"),
+                [],
+            )?;
+        }
         Ok(())
     }
 
@@ -535,15 +580,15 @@ impl Database {
 
     // ==================== Cost Session Operations ====================
 
-    /// Insert or update a cost session
-    #[allow(dead_code)]
+    /// Insert or update a cost session.
     pub fn upsert_cost_session(&self, session: &CostSession) -> Result<()> {
         self.conn.execute(
             r#"
             INSERT OR REPLACE INTO cost_sessions (
                 session_id, commit_sha, agent, model, project_path,
-                started_at, ended_at, tokens_in, tokens_out, tokens_cache, cost_usd
-            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
+                started_at, ended_at, tokens_in, tokens_out, tokens_cache, cost_usd,
+                is_measured, measured_cost_usd, category, one_shot_rate, yield_outcome
+            ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)
             "#,
             params![
                 session.session_id,
@@ -557,6 +602,11 @@ impl Database {
                 session.tokens_out,
                 session.tokens_cache,
                 session.cost_usd,
+                session.is_measured as i32,
+                session.measured_cost_usd,
+                session.category,
+                session.one_shot_rate,
+                session.yield_outcome,
             ],
         )?;
         Ok(())
@@ -588,6 +638,11 @@ impl Database {
                     tokens_out: row.get(8)?,
                     tokens_cache: row.get(9)?,
                     cost_usd: row.get(10)?,
+                    is_measured: row.get::<_, i64>(11).unwrap_or(0) != 0,
+                    measured_cost_usd: row.get(12).ok(),
+                    category: row.get(13).ok(),
+                    one_shot_rate: row.get(14).ok(),
+                    yield_outcome: row.get(15).ok(),
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
@@ -799,6 +854,11 @@ impl Database {
                     tokens_out: row.get(8)?,
                     tokens_cache: row.get(9)?,
                     cost_usd: row.get(10)?,
+                    is_measured: row.get::<_, i64>(11).unwrap_or(0) != 0,
+                    measured_cost_usd: row.get(12).ok(),
+                    category: row.get(13).ok(),
+                    one_shot_rate: row.get(14).ok(),
+                    yield_outcome: row.get(15).ok(),
                 })
             })?
             .collect::<std::result::Result<Vec<_>, _>>()?;
